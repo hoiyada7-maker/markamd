@@ -91,6 +91,13 @@ export function App() {
     STORAGE_KEYS.sidebarWidth,
     240,
   );
+  const [titlebarVisible, setTitlebarVisible] = usePersistedState<boolean>(
+    STORAGE_KEYS.titlebarVisible,
+    true,
+  );
+  const handleToggleTitlebar = useCallback(() => {
+    setTitlebarVisible((v: boolean) => !v);
+  }, [setTitlebarVisible]);
   const {
     treeVersion,
     bumpTree,
@@ -324,6 +331,24 @@ export function App() {
       {
         label: t("menu.rename"),
         onSelect: () => setEditingPath(path),
+      },
+      "divider",
+      {
+        label: t("menu.copyPath"),
+        onSelect: () => {
+          void navigator.clipboard.writeText(path);
+          showSaveAsToast(t("menu.pathCopied"));
+        },
+      },
+      {
+        label: t("menu.copyRelativePath"),
+        onSelect: () => {
+          const rel = rootPath && path.startsWith(rootPath)
+            ? path.slice(rootPath.length).replace(/^[\\/]/, "")
+            : path;
+          void navigator.clipboard.writeText(rel);
+          showSaveAsToast(t("menu.pathCopied"));
+        },
       },
     ];
     if (isDir) {
@@ -656,7 +681,7 @@ export function App() {
 
   return (
     <div
-      className={`mdv-app${sidebarOpen ? " has-sidebar" : ""}${readingMode ? " is-reading" : ""}`}
+      className={`mdv-app${sidebarOpen ? " has-sidebar" : ""}${readingMode ? " is-reading" : ""}${!titlebarVisible ? " has-hidden-titlebar" : ""}`}
     >
       <TitleBar
         fileName={displayName}
@@ -667,8 +692,6 @@ export function App() {
         onCopyMarkdown={activePath || source ? () => void copyMarkdown() : undefined}
         copyPulse={copyPulse}
         onExportPdf={exportToPdf}
-        vimOn={vimOn}
-        onToggleVim={() => setVimOn((v) => !v)}
       />
 
       <Breadcrumb
@@ -683,6 +706,12 @@ export function App() {
         onCopyMarkdown={activePath || source ? () => void copyMarkdown() : undefined}
         onExportPdf={exportToPdf}
         copyPulse={copyPulse}
+        titlebarVisible={titlebarVisible}
+        onToggleTitlebar={handleToggleTitlebar}
+        readingMode={readingMode}
+        onToggleReading={toggleReadingMode}
+        vimOn={vimOn}
+        onToggleVim={() => setVimOn((v) => !v)}
       />
 
       <main className="mdv-shell">
