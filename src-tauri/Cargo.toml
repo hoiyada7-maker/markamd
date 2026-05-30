@@ -1,6 +1,6 @@
 [package]
 name = "marka"
-version = "1.5.4"
+version = "1.5.5"
 description = "marka.md — a local markdown editor for the notes you share with ai"
 authors = ["Matt Enarle"]
 edition = "2021"
@@ -18,7 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["macos-private-api"] }
+tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-dialog = "2"
