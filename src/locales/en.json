@@ -75,6 +75,7 @@
   "menu.newFile": "new file",
   "menu.newFolder": "new folder",
   "menu.revealFinder": "reveal in finder",
+  "menu.revealExplorer": "reveal in file explorer",
   "menu.openDefault": "open in default app",
   "menu.delete": "delete",
   "menu.deleteFolder": "delete folder",

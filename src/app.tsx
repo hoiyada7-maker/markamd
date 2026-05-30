@@ -351,6 +351,11 @@ export function App() {
         },
       },
     ];
+    items.push("divider");
+    items.push({
+      label: t("menu.revealExplorer"),
+      onSelect: () => void invoke("reveal_in_file_manager", { path }),
+    });
     if (isDir) {
       items.push("divider");
       items.push({
@@ -362,11 +367,6 @@ export function App() {
         onSelect: () => setNewEntry({ parent: path, kind: "folder" }),
       });
     } else {
-      items.push("divider");
-      items.push({
-        label: t("menu.revealFinder"),
-        onSelect: () => void openPath(dirname(path)),
-      });
       items.push({
         label: t("menu.openDefault"),
         onSelect: () => void openPath(path),

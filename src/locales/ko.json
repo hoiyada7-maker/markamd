@@ -75,6 +75,7 @@
   "menu.newFile": "새 파일",
   "menu.newFolder": "새 폴더",
   "menu.revealFinder": "Finder에서 보기",
+  "menu.revealExplorer": "파일 탐색기에서 보기",
   "menu.openDefault": "기본 앱에서 열기",
   "menu.delete": "삭제",
   "menu.deleteFolder": "폴더 삭제",
