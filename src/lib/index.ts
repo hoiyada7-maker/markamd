@@ -58,6 +58,7 @@ export {
   dirname,
   joinPath,
   validateSupportedTextFile,
+  validatePlainTextFile,
   moveEntry,
   renameEntry,
   createFolder,

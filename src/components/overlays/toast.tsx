@@ -14,6 +14,7 @@ type ToastProps = {
   message: string;
   onDismiss: () => void;
   action?: ToastAction;
+  secondAction?: ToastAction;
   variant?: "error" | "info";
   /** ms before auto-dismiss; null disables. errors default manual, infos auto-dismiss. */
   durationMs?: number | null;
@@ -31,6 +32,7 @@ export function Toast({
   message,
   onDismiss,
   action,
+  secondAction,
   variant = "error",
   durationMs,
 }: ToastProps) {
@@ -85,6 +87,18 @@ export function Toast({
           }}
         >
           {action.label}
+        </button>
+      ) : null}
+      {secondAction ? (
+        <button
+          type="button"
+          className="mdv-toast__action"
+          onClick={() => {
+            void secondAction.onClick();
+            dismissWithExit();
+          }}
+        >
+          {secondAction.label}
         </button>
       ) : null}
       <Button

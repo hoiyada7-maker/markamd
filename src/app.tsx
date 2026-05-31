@@ -79,6 +79,7 @@ export function App() {
     saveNow,
     saveAs: saveAsCore,
     startNewBuffer,
+    loadPlainTextFile,
     dirty,
   } = useFileSession({ onLoadError: setLoadError });
 
@@ -832,6 +833,20 @@ export function App() {
                     } catch (err) {
                       console.error("marka.md: openPath failed", err);
                     }
+                  }
+                },
+              }
+            : undefined
+        }
+        secondAction={
+          loadError?.path && loadError.canOpenAsText
+            ? {
+                label: t("app.openAsText"),
+                onClick: () => {
+                  if (loadError.path) {
+                    void loadPlainTextFile(loadError.path).then(() => {
+                      setEditorOnly(true);
+                    });
                   }
                 },
               }

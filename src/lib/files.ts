@@ -148,16 +148,12 @@ export type FileValidation =
   | { ok: true }
   | { ok: false; reason: string };
 
-/** Quick guard before reading a supported plain-text file. Catches PDFs, images, oversized files. */
-export async function validateSupportedTextFile(path: string): Promise<FileValidation> {
-  if (!isSupportedTextPath(path)) {
-    return { ok: false, reason: `${basename(path)} isn't supported. marka.md opens .md / .markdown / .mdx / .csv` };
-  }
+async function checkBinaryAndSize(path: string): Promise<FileValidation> {
   try {
     const info = await stat(path);
     if (info.size > MAX_TEXT_BYTES) {
       const mb = (info.size / (1024 * 1024)).toFixed(1);
-      return { ok: false, reason: `${basename(path)} is ${mb} MB — too big to render safely. Open smaller text files.` };
+      return { ok: false, reason: `${basename(path)} is ${mb} MB — too big to open.` };
     }
     const head = await readFile(path);
     const slice = head.slice(0, 8);
@@ -170,6 +166,19 @@ export async function validateSupportedTextFile(path: string): Promise<FileValid
     return { ok: false, reason: `could not read ${basename(path)} — ${err}` };
   }
   return { ok: true };
+}
+
+/** Quick guard before reading a supported plain-text file. Catches PDFs, images, oversized files. */
+export async function validateSupportedTextFile(path: string): Promise<FileValidation> {
+  if (!isSupportedTextPath(path)) {
+    return { ok: false, reason: `${basename(path)} isn't supported. marka.md opens .md / .markdown / .mdx / .csv` };
+  }
+  return checkBinaryAndSize(path);
+}
+
+/** Validate any file as plain text (no extension restriction). Returns ok if not binary and not too large. */
+export async function validatePlainTextFile(path: string): Promise<FileValidation> {
+  return checkBinaryAndSize(path);
 }
 
 export async function readMarkdown(path: string): Promise<string> {

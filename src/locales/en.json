@@ -19,6 +19,7 @@
   "app.fileConflict": "this file changed externally · your unsaved edits would be lost",
   "app.reloadDiscard": "reload (discard mine)",
   "app.openDefault": "open in default app",
+  "app.openAsText": "open as text",
   "app.dropMarkdownOnly": "only .md / .markdown / .mdx / .csv files can be opened in marka.md",
   "app.stageFirst": "stage files from the sidebar first",
   "app.pdfFailed": "couldn't export to pdf",

@@ -19,6 +19,7 @@
   "app.fileConflict": "파일이 외부에서 변경됨 · 저장하지 않은 편집이 사라질 수 있습니다",
   "app.reloadDiscard": "다시 불러오기(내 변경 버림)",
   "app.openDefault": "기본 앱에서 열기",
+  "app.openAsText": "텍스트로 열기",
   "app.dropMarkdownOnly": ".md / .markdown / .mdx / .csv 파일만 열 수 있습니다",
   "app.stageFirst": "먼저 사이드바에서 파일을 스테이지하세요",
   "app.pdfFailed": "PDF로 내보낼 수 없습니다",

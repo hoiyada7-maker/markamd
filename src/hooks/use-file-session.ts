@@ -6,6 +6,7 @@ import {
   pickSaveMarkdown,
   readMarkdown,
   STORAGE_KEYS,
+  validatePlainTextFile,
   validateSupportedTextFile,
   writeMarkdown,
 } from "@/lib";
@@ -18,7 +19,7 @@ const SAVED_FLASH_MS = 1200;
 const INITIAL_TAB_ID = "tab-0";
 const UNTITLED_TITLE = "untitled";
 
-export type LoadError = { message: string; path?: string };
+export type LoadError = { message: string; path?: string; canOpenAsText?: boolean };
 export type FileTab = {
   id: string;
   path: string | null;
@@ -59,6 +60,8 @@ type UseFileSessionResult = {
   saveAs: () => Promise<string | null>;
   /** Discard buffer, leave activePath null. Accepts optional initial text for OS-drop. */
   startNewBuffer: (initial?: string) => void;
+  /** Load any file as plain text, bypassing extension validation. */
+  loadPlainTextFile: (path: string) => Promise<void>;
   dirty: boolean;
 };
 
@@ -211,7 +214,10 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
       const check = await validateSupportedTextFile(path);
       if (seq !== loadSeq.current) return;
       if (!check.ok) {
-        onLoadError?.({ message: check.reason, path });
+        // Check if it might be openable as plain text despite unsupported extension
+        const plainCheck = await validatePlainTextFile(path);
+        const canOpenAsText = plainCheck.ok;
+        onLoadError?.({ message: check.reason, path, canOpenAsText });
         console.warn("marka.md: refused to open", path, "·", check.reason);
         return;
       }
@@ -306,6 +312,37 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
       setSaveStatus("dirty");
     }
   }, [activeTabId, titleForPath]);
+
+  const loadPlainTextFile = useCallback(async (path: string) => {
+    const seq = ++loadSeq.current;
+    const check = await validatePlainTextFile(path);
+    if (seq !== loadSeq.current) return;
+    if (!check.ok) {
+      onLoadError?.({ message: check.reason, path });
+      return;
+    }
+    try {
+      const content = await readMarkdown(path);
+      if (seq !== loadSeq.current) return;
+      setSource(content);
+      setSavedContent(content);
+      setActivePath(path);
+      const tab: FileTab = {
+        id: makeTabId(),
+        path,
+        title: titleForPath(path),
+        source: content,
+        savedContent: content,
+      };
+      setTabs((prev) => [...snapshotActiveTab(prev), tab]);
+      setActiveTabId(tab.id);
+      setSaveStatus("idle");
+      setRecentFiles((prev) => [path, ...prev.filter((p) => p !== path)].slice(0, 8));
+    } catch (err) {
+      console.error("marka.md: loadPlainTextFile failed", err);
+      onLoadError?.({ message: String(err), path });
+    }
+  }, [makeTabId, setActivePath, setRecentFiles, onLoadError, snapshotActiveTab, titleForPath]);
 
   const saveAs = useCallback(async (): Promise<string | null> => {
     const defaultPath = activePath
@@ -402,6 +439,7 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     saveNow,
     saveAs,
     startNewBuffer,
+    loadPlainTextFile,
     dirty,
   };
 }
