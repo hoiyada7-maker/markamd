@@ -25,7 +25,6 @@ import {
   basename,
   buildCommands,
   CHANGELOG_URL,
-  dirname,
   estimateTokens,
   exportPreviewToPdf,
   formatContextBundle,
