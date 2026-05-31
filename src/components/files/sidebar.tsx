@@ -1,24 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Copy, FolderOpen, Search, Trash2, X } from "lucide-react";
+import { Copy, FolderPlus, Search, Trash2, X } from "lucide-react";
 import { Button, Icon } from "@/components/primitives";
-import { basename, shortcutLabel, startWindowDrag, useI18n, type FileEntry } from "@/lib";
+import { startWindowDrag, useI18n, type FileEntry } from "@/lib";
 import emptyTowerUrl from "@/assets/mascot/empty-m.png";
-import { FileTree, type NewEntry } from "./file-tree";
+import { type NewEntry } from "./file-tree";
 import { SearchResults } from "./sidebar-search";
+import { RootFolder } from "./root-folder";
+import { Favorites } from "./favorites";
 
 type SidebarProps = {
   open: boolean;
   rootPath: string | null;
+  folders: readonly string[];
   activePath: string | null;
   width: number;
   onWidthChange: (next: number) => void;
-  onOpenFolder: () => void;
+  onAddFolder: () => void;
+  onCloseFolder: (path: string) => void;
   onSelectFile: (path: string) => void;
   onMove?: (src: string, dstParent: string) => void;
   onContextMenu?: (e: React.MouseEvent, entry: FileEntry) => void;
   stagedPaths?: readonly string[];
   stagedTokenLabel?: string;
   onToggleStage?: (path: string) => void;
+  favorites?: readonly string[];
+  onToggleFavorite?: (path: string) => void;
+  onReorderFavorites?: (from: number, to: number) => void;
   onCopyContext?: () => void;
   onClearContext?: () => void;
   editingPath?: string | null;
@@ -36,16 +43,21 @@ const MAX_WIDTH = 420;
 export function Sidebar({
   open,
   rootPath,
+  folders,
   activePath,
   width,
   onWidthChange,
-  onOpenFolder,
+  onAddFolder,
+  onCloseFolder,
   onSelectFile,
   onMove,
   onContextMenu,
   stagedPaths = [],
   stagedTokenLabel = "0",
   onToggleStage,
+  favorites = [],
+  onToggleFavorite,
+  onReorderFavorites,
   onCopyContext,
   onClearContext,
   editingPath,
@@ -142,11 +154,11 @@ export function Sidebar({
     >
       <div className="mdv-sidebar__inner" style={{ width: `${width}px` }}>
         <header className="mdv-sidebar__header" data-tauri-drag-region onMouseDown={startWindowDrag}>
-          <span className={`mdv-sidebar__title${rootPath ? "" : " is-empty"}`}>
-            {rootPath ? basename(rootPath) : t("sidebar.noFolder")}
+          <span className="mdv-sidebar__title">
+            {t("sidebar.explorer")}
           </span>
           <div className="mdv-sidebar__header-actions">
-            {rootPath ? (
+            {folders.length > 0 ? (
               <Button
                 data-tooltip={searchOpen ? t("sidebar.closeSearchShortcut") : t("sidebar.searchFolder")}
                 aria-label={searchOpen ? t("sidebar.closeSearch") : t("sidebar.searchFolder")}
@@ -156,10 +168,10 @@ export function Sidebar({
               />
             ) : null}
             <Button
-              data-tooltip={shortcutLabel(t("app.openFolderShortcut"))}
-              aria-label={t("app.openFolder")}
-              onClick={onOpenFolder}
-              icon={<Icon icon={FolderOpen} size={13} strokeWidth={1.5} />}
+              data-tooltip={t("sidebar.addFolder")}
+              aria-label={t("sidebar.addFolder")}
+              onClick={onAddFolder}
+              icon={<Icon icon={FolderPlus} size={13} strokeWidth={1.5} />}
             />
           </div>
         </header>
@@ -229,8 +241,8 @@ export function Sidebar({
             onMove(src, rootPath);
           }}
         >
-          {rootPath ? (
-            query.trim().length > 0 ? (
+          {folders.length > 0 ? (
+            query.trim().length > 0 && rootPath ? (
               <SearchResults
                 rootPath={rootPath}
                 query={query}
@@ -239,25 +251,44 @@ export function Sidebar({
                 onSelect={onSelectFile}
               />
             ) : (
-              <FileTree
-                rootPath={rootPath}
-                activePath={activePath}
-                onSelect={onSelectFile}
-                onMove={onMove}
-                onContextMenu={onContextMenu}
-                stagedPaths={stagedPaths}
-                onToggleStage={onToggleStage}
-                editingPath={editingPath}
-                onSubmitRename={onSubmitRename}
-                onCancelEdit={onCancelEdit}
-                newEntry={newEntry}
-                onSubmitNew={onSubmitNew}
-                onCancelNew={onCancelNew}
-                treeVersion={treeVersion}
-              />
+              <>
+                <Favorites
+                  favorites={favorites}
+                  activePath={activePath}
+                  title={t("sidebar.favorites")}
+                  emptyLabel={t("sidebar.noFavorites")}
+                  removeLabel={t("sidebar.unfavorite")}
+                  onSelect={onSelectFile}
+                  onToggleFavorite={(p) => onToggleFavorite?.(p)}
+                  onReorder={(from, to) => onReorderFavorites?.(from, to)}
+                />
+                {folders.map((folder) => (
+                  <RootFolder
+                    key={folder}
+                    path={folder}
+                    activePath={activePath}
+                    onSelect={onSelectFile}
+                    onMove={onMove}
+                    onContextMenu={onContextMenu}
+                    onClose={onCloseFolder}
+                    closeLabel={t("sidebar.closeFolder")}
+                    stagedPaths={stagedPaths}
+                    onToggleStage={onToggleStage}
+                    favoritePaths={favorites}
+                    onToggleFavorite={onToggleFavorite}
+                    editingPath={editingPath}
+                    onSubmitRename={onSubmitRename}
+                    onCancelEdit={onCancelEdit}
+                    newEntry={newEntry}
+                    onSubmitNew={onSubmitNew}
+                    onCancelNew={onCancelNew}
+                    treeVersion={treeVersion}
+                  />
+                ))}
+              </>
             )
           ) : (
-            <button type="button" className="mdv-sidebar__empty" onClick={onOpenFolder}>
+            <button type="button" className="mdv-sidebar__empty" onClick={onAddFolder}>
               <img
                 src={emptyTowerUrl}
                 alt=""
@@ -267,7 +298,7 @@ export function Sidebar({
                 draggable={false}
                 className="mdv-sidebar__empty-art"
               />
-              <span>{t("app.openFolder")}</span>
+              <span>{t("sidebar.addFolder")}</span>
               <span className="mdv-sidebar__hint">{t("sidebar.browseNotes")}</span>
             </button>
           )}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Check, ChevronRight, FilePlus2, FileText, Folder, FolderOpen, Table2 } from "lucide-react";
+import { Check, ChevronRight, FilePlus2, FileText, Folder, FolderOpen, Star, Table2 } from "lucide-react";
 import { Icon } from "@/components/primitives";
 import { isCsvPath, type FileEntry } from "@/lib";
 import { FileTree, type NewEntry } from "./file-tree";
@@ -21,6 +21,8 @@ type FolderNodeProps = {
   onContextMenu?: (e: React.MouseEvent, entry: FileEntry) => void;
   stagedPaths?: readonly string[];
   onToggleStage?: (path: string) => void;
+  favoritePaths?: readonly string[];
+  onToggleFavorite?: (path: string) => void;
   editingPath?: string | null;
   onSubmitRename?: (src: string, newName: string) => void;
   onCancelEdit?: () => void;
@@ -39,6 +41,8 @@ export function FolderNode({
   onContextMenu,
   stagedPaths = [],
   onToggleStage,
+  favoritePaths = [],
+  onToggleFavorite,
   editingPath,
   onSubmitRename,
   onCancelEdit,
@@ -121,6 +125,8 @@ export function FolderNode({
           onContextMenu={onContextMenu}
           stagedPaths={stagedPaths}
           onToggleStage={onToggleStage}
+          favoritePaths={favoritePaths}
+          onToggleFavorite={onToggleFavorite}
           editingPath={editingPath}
           onSubmitRename={onSubmitRename}
           onCancelEdit={onCancelEdit}
@@ -142,6 +148,8 @@ type FileNodeProps = {
   onContextMenu?: (e: React.MouseEvent, entry: FileEntry) => void;
   staged?: boolean;
   onToggleStage?: (path: string) => void;
+  favorite?: boolean;
+  onToggleFavorite?: (path: string) => void;
   depth: number;
 };
 
@@ -152,6 +160,8 @@ export function FileNode({
   onContextMenu,
   staged = false,
   onToggleStage,
+  favorite = false,
+  onToggleFavorite,
   depth,
 }: FileNodeProps) {
   const onDragStart = (e: React.DragEvent<HTMLButtonElement>) => {
@@ -180,7 +190,7 @@ export function FileNode({
       <button
         type="button"
         draggable
-        className={`mdv-tree__row mdv-tree__row--file${active ? " is-active" : ""}${staged ? " is-staged" : ""}`}
+        className={`mdv-tree__row mdv-tree__row--file${active ? " is-active" : ""}${staged ? " is-staged" : ""}${onToggleFavorite ? " has-fav" : ""}`}
         style={{ paddingLeft: `${8 + depth * 12 + 4}px` }}
         onClick={handleClick}
         onContextMenu={onCtx}
@@ -195,7 +205,7 @@ export function FileNode({
       {onToggleStage ? (
         <button
           type="button"
-          className={`mdv-tree__stage${staged ? " is-staged" : ""}`}
+          className={`mdv-tree__stage${staged ? " is-staged" : ""}${onToggleFavorite ? " has-fav" : ""}`}
           data-tooltip={staged ? "remove from context" : "stage for context"}
           aria-label={staged ? `remove ${entry.name} from context` : `stage ${entry.name} for context`}
           aria-pressed={staged}
@@ -205,6 +215,21 @@ export function FileNode({
           }}
         >
           <Icon icon={staged ? Check : FilePlus2} size={11} strokeWidth={1.8} />
+        </button>
+      ) : null}
+      {onToggleFavorite ? (
+        <button
+          type="button"
+          className={`mdv-tree__fav${favorite ? " is-fav" : ""}`}
+          data-tooltip={favorite ? "remove from favorites" : "add to favorites"}
+          aria-label={favorite ? `remove ${entry.name} from favorites` : `add ${entry.name} to favorites`}
+          aria-pressed={favorite}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(entry.path);
+          }}
+        >
+          <Icon icon={Star} size={11} strokeWidth={1.8} />
         </button>
       ) : null}
     </li>

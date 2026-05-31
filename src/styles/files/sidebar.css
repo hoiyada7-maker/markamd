@@ -581,3 +581,152 @@
   opacity: 0.42;
   cursor: default;
 }
+
+/* ── multi-folder roots + favorites ─────────────────────────────── */
+.mdv-rootfolder {
+  margin: 0 0 2px;
+}
+
+.mdv-rootfolder__header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding-right: 6px;
+  transition: background var(--dur-fast) var(--easing);
+}
+
+.mdv-rootfolder__header:hover {
+  background: var(--surface-hover);
+}
+
+.mdv-rootfolder__header.is-drop-target {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: -1px;
+}
+
+.mdv-rootfolder__toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px 6px 8px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--fg);
+  text-align: left;
+}
+
+.mdv-rootfolder__name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mdv-rootfolder__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--dur-fast) var(--easing),
+    color var(--dur-fast) var(--easing),
+    background var(--dur-fast) var(--easing);
+}
+
+.mdv-rootfolder__header:hover .mdv-rootfolder__close,
+.mdv-rootfolder__close:focus-visible {
+  opacity: 1;
+}
+
+.mdv-rootfolder__close:hover {
+  color: var(--fg);
+  background: var(--surface-hover);
+}
+
+.mdv-favorites__star {
+  color: var(--accent);
+}
+
+.mdv-favorites__empty {
+  margin: 0;
+  padding: 6px 14px 8px 26px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  line-height: 1.4;
+}
+
+/* favorite (star) toggle — sits to the right of the stage button */
+.mdv-tree__row--file.has-fav {
+  padding-right: 54px;
+}
+
+.mdv-tree__stage.has-fav {
+  right: 28px;
+}
+
+.mdv-tree__fav {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  cursor: pointer;
+  transition:
+    opacity var(--dur-fast) var(--easing),
+    color var(--dur-fast) var(--easing),
+    background var(--dur-fast) var(--easing);
+}
+
+.mdv-tree__item:hover .mdv-tree__fav,
+.mdv-tree__fav:focus-visible,
+.mdv-tree__fav.is-fav {
+  opacity: 1;
+}
+
+.mdv-tree__fav:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.mdv-tree__fav.is-fav {
+  color: var(--accent);
+}
+
+/* CSS `fill` overrides lucide's fill="none" presentation attribute */
+.mdv-tree__fav.is-fav svg {
+  fill: currentColor;
+}
+
+/* favorites reorder drop indicator */
+.mdv-tree__item.is-fav-over .mdv-tree__row {
+  box-shadow: inset 0 2px 0 var(--accent);
+}

@@ -90,6 +90,48 @@ export function App() {
     STORAGE_KEYS.sidebarWidth,
     240,
   );
+  const [folders, setFolders] = usePersistedState<string[]>(
+    STORAGE_KEYS.folders,
+    [],
+  );
+  const [favorites, setFavorites] = usePersistedState<string[]>(
+    STORAGE_KEYS.favorites,
+    [],
+  );
+
+  // migrate the legacy single-folder session into the multi-folder list,
+  // and keep useFileSession.rootPath pointed at the first folder so context
+  // bundling / save-as / search keep working against a concrete root.
+  useEffect(() => {
+    if (folders.length === 0 && rootPath) {
+      setFolders([rootPath]);
+    } else if (folders.length > 0 && folders[0] !== rootPath) {
+      setRootPath(folders[0]);
+    } else if (folders.length === 0 && rootPath !== null) {
+      setRootPath(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [folders]);
+
+  const handleCloseFolder = useCallback((path: string) => {
+    setFolders((prev) => prev.filter((f) => f !== path));
+  }, [setFolders]);
+
+  const toggleFavorite = useCallback((path: string) => {
+    setFavorites((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path],
+    );
+  }, [setFavorites]);
+
+  const reorderFavorites = useCallback((from: number, to: number) => {
+    setFavorites((prev) => {
+      if (from < 0 || from >= prev.length || to < 0 || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, [setFavorites]);
   const [titlebarVisible, setTitlebarVisible] = usePersistedState<boolean>(
     STORAGE_KEYS.titlebarVisible,
     true,
@@ -306,11 +348,10 @@ export function App() {
 
   const handleOpenFolder = useCallback(async () => {
     const folder = await pickFolder();
-    if (folder) {
-      setRootPath(folder);
-      setSidebarOpen(true);
-    }
-  }, [setRootPath, setSidebarOpen]);
+    if (!folder) return;
+    setFolders((prev) => (prev.includes(folder) ? prev : [...prev, folder]));
+    setSidebarOpen(true);
+  }, [setFolders, setSidebarOpen]);
 
   const handleOpenFile = useCallback(async () => {
     const file = await pickMarkdownFile();
@@ -729,16 +770,21 @@ export function App() {
             <Sidebar
               open={sidebarOpen}
               rootPath={rootPath}
+              folders={folders}
               activePath={activePath}
               width={sidebarWidth}
               onWidthChange={setSidebarWidth}
-              onOpenFolder={handleOpenFolder}
+              onAddFolder={handleOpenFolder}
+              onCloseFolder={handleCloseFolder}
               onSelectFile={(path) => void loadFile(path)}
               onMove={handleMove}
               onContextMenu={handleContextMenu}
               stagedPaths={stagedPaths}
               stagedTokenLabel={stagedTokenLabel}
               onToggleStage={toggleStagedPath}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              onReorderFavorites={reorderFavorites}
               onCopyContext={() => void copyContextBundle()}
               onClearContext={clearContextBundle}
               editingPath={editingPath}

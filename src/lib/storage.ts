@@ -12,6 +12,8 @@ export const STORAGE_KEYS = {
   vimMode: "mdview.vim",
   language: "mdview.language",
   titlebarVisible: "mdview.titlebar.visible",
+  folders: "mdview.folders",
+  favorites: "mdview.favorites",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
