@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Breadcrumb, StatusBar, TitleBar, type VimMode } from "@/components/chrome";
 import { Editor, OpenTabs, Preview, ReadingFind, Splitter } from "@/components/editor";
 import { ContextMenu, Sidebar, type ContextMenuItem } from "@/components/files";
@@ -9,6 +9,7 @@ import {
   useDebouncedValue,
   useFileOps,
   useFileSession,
+  type LoadError,
   useNotifications,
   useOverlays,
   usePersistedState,
@@ -56,6 +57,30 @@ export function App() {
     copyMarkdown: copyMarkdownCore,
   } = useNotifications();
 
+  // Per-extension preference: 'text' | 'default', remembered until app closes.
+  const extPrefs = useRef<Map<string, "text" | "default">>(new Map());
+  const loadPlainTextFileRef = useRef<((path: string) => Promise<void>) | undefined>(undefined);
+
+  const getExt = useCallback((path: string) => {
+    const dot = path.lastIndexOf(".");
+    return dot >= 0 ? path.slice(dot + 1).toLowerCase() : "";
+  }, []);
+
+  const handleLoadError = useCallback((err: LoadError) => {
+    if (err.path && err.canOpenAsText) {
+      const pref = extPrefs.current.get(getExt(err.path));
+      if (pref === "text") {
+        void loadPlainTextFileRef.current?.(err.path);
+        return;
+      }
+      if (pref === "default") {
+        void openPath(err.path).catch(() => undefined);
+        return;
+      }
+    }
+    setLoadError(err);
+  }, [getExt, setLoadError]);
+
   const {
     source,
     setSource,
@@ -81,7 +106,9 @@ export function App() {
     startNewBuffer,
     loadPlainTextFile,
     dirty,
-  } = useFileSession({ onLoadError: setLoadError });
+  } = useFileSession({ onLoadError: handleLoadError });
+
+  useEffect(() => { loadPlainTextFileRef.current = loadPlainTextFile; }, [loadPlainTextFile]);
 
   const [sidebarOpen, setSidebarOpen] = usePersistedState<boolean>(
     STORAGE_KEYS.sidebarOpen,
@@ -237,6 +264,17 @@ export function App() {
       return next;
     });
   }, []);
+
+  // Sync editor-only mode with file type: md restores preview, known plain-text hides it.
+  useEffect(() => {
+    if (!activePath) return;
+    const lower = activePath.toLowerCase();
+    if (lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".mdx")) {
+      setEditorOnly(false);
+    } else if (extPrefs.current.get(getExt(activePath)) === "text") {
+      setEditorOnly(true);
+    }
+  }, [activePath, getExt]);
 
   // ⌘F only bound while reading — CM owns it in editor mode.
   const [findOpen, setFindOpen] = useState(false);
@@ -828,6 +866,9 @@ export function App() {
                 label: t("app.openDefault"),
                 onClick: async () => {
                   if (loadError.path) {
+                    if (loadError.canOpenAsText) {
+                      extPrefs.current.set(getExt(loadError.path), "default");
+                    }
                     try {
                       await openPath(loadError.path);
                     } catch (err) {
@@ -844,9 +885,8 @@ export function App() {
                 label: t("app.openAsText"),
                 onClick: () => {
                   if (loadError.path) {
-                    void loadPlainTextFile(loadError.path).then(() => {
-                      setEditorOnly(true);
-                    });
+                    extPrefs.current.set(getExt(loadError.path), "text");
+                    void loadPlainTextFile(loadError.path);
                   }
                 },
               }
