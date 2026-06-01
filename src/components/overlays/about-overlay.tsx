@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, FileText, Globe, Layers3, Palette, Star, Table2, X } from "lucide-react";
+import { Download, FileText, FolderOpen, Globe, Layers3, Palette, Star, Table2, X } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Button, Icon, Overlay } from "@/components/primitives";
@@ -18,6 +18,7 @@ const AUTHOR_PERSONAL_URL = "https://mattenarle.com";
 const FEATURES = [
   { icon: FileText, label: "markdown", detail: "write + preview" },
   { icon: Layers3, label: "context", detail: "bundle for ai" },
+  { icon: FolderOpen, label: "files", detail: "copy paths + reveal" },
   { icon: Table2, label: "csv", detail: "quick table view" },
   { icon: Palette, label: "themes", detail: "calm palettes" },
 ];

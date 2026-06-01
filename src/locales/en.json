@@ -185,11 +185,11 @@
   "help.tip1": "marka.md is built around one loop: collect notes → write → share with ai. nothing leaves your machine until you press copy.",
   "help.tip2": "open a folder to turn the sidebar into your context library. tap search to search .md and .csv files across the tree.",
   "help.tip3": "press ⌘. for distraction-free reading mode — great for proofing before pasting into any ai chat.",
-  "help.tip4": "the top file-action row has copy, export, new file, open file, and open folder — export is not shortcut-only.",
+  "help.tip4": "the toolbar keeps view controls and file actions together: reading mode, titlebar, themes, copy, export, new file, open file, and open folder.",
   "help.tip5": "⌘⇧C copies the current file as plain markdown. drop it straight into any chat.",
   "help.tip6": "⌘P opens the same pdf export flow as the visible export button.",
   "help.tip7": "drag the divider between editor and preview to resize. ratio is remembered per session.",
-  "help.tip8": "code blocks have a hover-to-show copy button. mermaid + shiki render live, including mermaid in pdf export.",
+  "help.tip8": "right-click sidebar items to copy absolute or relative paths, reveal files in your file manager, rename, create, or delete.",
   "tabs.openFiles": "open files",
   "tabs.close": "close {name}",
   "tabs.closeUnsaved": "Close \"{name}\" with unsaved changes?"

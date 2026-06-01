@@ -57,6 +57,7 @@ export {
   basename,
   dirname,
   joinPath,
+  relativePath,
   validateSupportedTextFile,
   validatePlainTextFile,
   moveEntry,
