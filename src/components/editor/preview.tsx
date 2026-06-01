@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { readFile } from "@tauri-apps/plugin-fs";
 import { ensureMarkdownReady, renderMarkdown, useTheme } from "@/lib";
 import inspectUrl from "@/assets/mascot/inspect.png";
 import { renderMermaidBlocks } from "@/lib/mermaid";
@@ -15,6 +16,48 @@ const COPY_ICON_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="non
 const CHECK_ICON_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
 const COPY_DEFAULT_HTML = `<span class="mdv-copy__icon mdv-copy__icon--default">${COPY_ICON_SVG}copy</span>`;
 const COPY_DONE_HTML = `<span class="mdv-copy__icon mdv-copy__icon--done">${CHECK_ICON_SVG}copied</span>`;
+
+function uint8ToBase64(bytes: Uint8Array): string {
+  const chunks: string[] = [];
+  const CHUNK = 8192;
+  for (let i = 0; i < bytes.byteLength; i += CHUNK)
+    chunks.push(String.fromCharCode(...bytes.subarray(i, i + CHUNK)));
+  return btoa(chunks.join(""));
+}
+
+function imgMime(ext: string): string {
+  switch (ext.toLowerCase()) {
+    case "jpg": case "jpeg": return "image/jpeg";
+    case "png": return "image/png";
+    case "gif": return "image/gif";
+    case "webp": return "image/webp";
+    case "svg": return "image/svg+xml";
+    case "bmp": return "image/bmp";
+    default: return "image/png";
+  }
+}
+
+async function resolveLocalImages(article: HTMLElement, filePath: string): Promise<void> {
+  const lastSep = Math.max(filePath.lastIndexOf("\\"), filePath.lastIndexOf("/"));
+  const dir = filePath.slice(0, lastSep);
+  const sep = filePath.includes("\\") ? "\\" : "/";
+  await Promise.all(
+    Array.from(article.querySelectorAll("img")).map(async (img) => {
+      const src = img.getAttribute("src");
+      if (!src || /^(?:https?:|data:|tauri:|asset:)/.test(src)) return;
+      const decoded = decodeURIComponent(src.startsWith("./") ? src.slice(2) : src);
+      const absPath = dir + sep + decoded.replace(/\//g, sep);
+      const dot = decoded.lastIndexOf(".");
+      const ext = dot >= 0 ? decoded.slice(dot + 1) : "png";
+      try {
+        const bytes = await readFile(absPath);
+        img.src = `data:${imgMime(ext)};base64,${uint8ToBase64(bytes)}`;
+      } catch {
+        // leave src as-is if file can't be read
+      }
+    })
+  );
+}
 
 function decorateCodeBlocks(root: HTMLElement): () => void {
   const cleanups: Array<() => void> = [];
@@ -104,7 +147,8 @@ export function Preview({ source, filePath }: PreviewProps) {
   useEffect(() => {
     if (!articleRef.current || csvPreview) return;
     articleRef.current.innerHTML = html;
-  }, [html, csvPreview]);
+    if (filePath) void resolveLocalImages(articleRef.current, filePath);
+  }, [html, filePath, csvPreview]);
 
   useEffect(() => {
     if (!articleRef.current || csvPreview) return;
