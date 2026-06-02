@@ -77,7 +77,7 @@ export function FileTree({
   if (!entries) {
     return <div className="mdv-tree__loading">loading…</div>;
   }
-  if (entries.length === 0 && depth === 0 && !(newEntry && newEntry.parent === rootPath)) {
+  if (entries.length === 0 && depth <= 1 && !(newEntry && newEntry.parent === rootPath)) {
     return <div className="mdv-tree__empty">empty folder</div>;
   }
 

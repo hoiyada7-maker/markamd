@@ -121,6 +121,23 @@ const md = new MarkdownIt({
 md.use(taskLists, { enabled: false, label: true });
 md.use(mark);
 
+// GitHub-style heading slugs for TOC anchor navigation
+const slugify = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/ /g, "-")
+    .replace(/^-|-$/g, "");
+
+md.renderer.rules.heading_open = (tokens, idx, options, _env, self) => {
+  const inline = tokens[idx + 1];
+  if (inline?.type === "inline") {
+    const id = slugify(inline.content);
+    if (id) tokens[idx].attrSet("id", id);
+  }
+  return self.renderToken(tokens, idx, options);
+};
+
 export async function ensureMarkdownReady(): Promise<void> {
   await getHighlighter();
 }
