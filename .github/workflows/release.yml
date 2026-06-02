@@ -52,6 +52,9 @@ jobs:
       - name: checkout
         uses: actions/checkout@v6
         with:
+          # Manual dispatch should build the requested tag, not the branch the
+          # workflow UI was opened from.
+          ref: ${{ env.RELEASE_TAG }}
           # need full history + tags so we can derive a per-release commit list
           # via `git log <prev_tag>..<this_tag>` for the changelog.
           fetch-depth: 0
