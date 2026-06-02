@@ -252,16 +252,18 @@ export function Sidebar({
               />
             ) : (
               <>
-                <Favorites
-                  favorites={favorites}
-                  activePath={activePath}
-                  title={t("sidebar.favorites")}
-                  emptyLabel={t("sidebar.noFavorites")}
-                  removeLabel={t("sidebar.unfavorite")}
-                  onSelect={onSelectFile}
-                  onToggleFavorite={(p) => onToggleFavorite?.(p)}
-                  onReorder={(from, to) => onReorderFavorites?.(from, to)}
-                />
+                {favorites.length > 0 ? (
+                  <Favorites
+                    favorites={favorites}
+                    activePath={activePath}
+                    title={t("sidebar.favorites")}
+                    emptyLabel={t("sidebar.noFavorites")}
+                    removeLabel={t("sidebar.unfavorite")}
+                    onSelect={onSelectFile}
+                    onToggleFavorite={(p) => onToggleFavorite?.(p)}
+                    onReorder={(from, to) => onReorderFavorites?.(from, to)}
+                  />
+                ) : null}
                 {folders.map((folder) => (
                   <RootFolder
                     key={folder}

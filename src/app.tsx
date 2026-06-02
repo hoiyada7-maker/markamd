@@ -67,6 +67,13 @@ export function App() {
     return dot >= 0 ? path.slice(dot + 1).toLowerCase() : "";
   }, []);
 
+  const isPathWithin = useCallback((child: string, parent: string) => {
+    if (child === parent) return true;
+    const sep = parent.includes("\\") ? "\\" : "/";
+    const prefix = parent.endsWith(sep) ? parent : parent + sep;
+    return child.startsWith(prefix);
+  }, []);
+
   const handleLoadError = useCallback((err: LoadError) => {
     if (err.path && err.canOpenAsText) {
       const pref = extPrefs.current.get(getExt(err.path));
@@ -127,24 +134,43 @@ export function App() {
     STORAGE_KEYS.favorites,
     [],
   );
+  const didHydrateFoldersRef = useRef(false);
 
   // migrate the legacy single-folder session into the multi-folder list,
   // and keep useFileSession.rootPath pointed at the first folder so context
   // bundling / save-as / search keep working against a concrete root.
   useEffect(() => {
-    if (folders.length === 0 && rootPath) {
-      setFolders([rootPath]);
-    } else if (folders.length > 0 && folders[0] !== rootPath) {
+    if (!didHydrateFoldersRef.current) {
+      didHydrateFoldersRef.current = true;
+      if (folders.length === 0 && rootPath) {
+        setFolders([rootPath]);
+        return;
+      }
+    }
+    if (folders.length > 0 && folders[0] !== rootPath) {
       setRootPath(folders[0]);
     } else if (folders.length === 0 && rootPath !== null) {
       setRootPath(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folders]);
+  }, [folders, rootPath, setFolders, setRootPath]);
 
   const handleCloseFolder = useCallback((path: string) => {
-    setFolders((prev) => prev.filter((f) => f !== path));
-  }, [setFolders]);
+    const nextFolders = folders.filter((folder) => folder !== path);
+    setFolders(nextFolders);
+    setRootPath(nextFolders[0] ?? null);
+    if (activePath && isPathWithin(activePath, path)) {
+      startNewBuffer();
+    }
+    setFavorites((prev) => prev.filter((favorite) => !isPathWithin(favorite, path)));
+  }, [
+    activePath,
+    folders,
+    isPathWithin,
+    setFavorites,
+    setFolders,
+    setRootPath,
+    startNewBuffer,
+  ]);
 
   const toggleFavorite = useCallback((path: string) => {
     setFavorites((prev) =>

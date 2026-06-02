@@ -48,6 +48,7 @@ export function RootFolder({
 }: RootFolderProps) {
   const [open, setOpen] = useState(true);
   const [isDropTarget, setIsDropTarget] = useState(false);
+  const name = basename(path);
 
   // auto-open when a new entry is being created at this root
   useEffect(() => {
@@ -96,7 +97,10 @@ export function RootFolder({
           <span className="mdv-tree__icon">
             <Icon icon={open ? FolderOpen : Folder} size={13} strokeWidth={1.5} />
           </span>
-          <span className="mdv-rootfolder__name">{basename(path)}</span>
+          <span className="mdv-rootfolder__label">
+            <span className="mdv-rootfolder__name">{name}</span>
+            <span className="mdv-rootfolder__path">{path}</span>
+          </span>
         </button>
         <button
           type="button"
