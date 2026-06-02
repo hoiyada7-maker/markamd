@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronRight, FileText, Star, Table2 } from "lucide-react";
 import { Icon } from "@/components/primitives";
-import { basename, isCsvPath } from "@/lib";
+import { basename, isCsvPath, type FileEntry } from "@/lib";
 
 type FavoritesProps = {
   favorites: readonly string[];
@@ -12,6 +12,7 @@ type FavoritesProps = {
   onSelect: (path: string) => void;
   onToggleFavorite: (path: string) => void;
   onReorder: (from: number, to: number) => void;
+  onContextMenu?: (e: React.MouseEvent, entry: FileEntry) => void;
 };
 
 export function Favorites({
@@ -23,6 +24,7 @@ export function Favorites({
   onSelect,
   onToggleFavorite,
   onReorder,
+  onContextMenu,
 }: FavoritesProps) {
   const [open, setOpen] = useState(true);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -61,6 +63,11 @@ export function Favorites({
                   className={`mdv-tree__row mdv-tree__row--file has-fav${activePath === path ? " is-active" : ""}`}
                   style={{ paddingLeft: "12px" }}
                   onClick={() => onSelect(path)}
+                  onContextMenu={(e) => {
+                    if (!onContextMenu) return;
+                    e.preventDefault();
+                    onContextMenu(e, { path, name: basename(path), isDir: false });
+                  }}
                   title={path}
                   onDragStart={(e) => {
                     setDragIndex(i);

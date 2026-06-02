@@ -112,6 +112,7 @@ export function Preview({ source, filePath }: PreviewProps) {
   const theme = useTheme();
   const [ready, setReady] = useState(false);
   const articleRef = useRef<HTMLElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const csvPreview = filePath ? isCsvPath(filePath) : false;
 
   useEffect(() => {
@@ -161,6 +162,24 @@ export function Preview({ source, filePath }: PreviewProps) {
     void renderMermaidBlocks(articleRef.current, mermaidTheme);
   }, [html, theme, csvPreview]);
 
+  useEffect(() => {
+    const article = articleRef.current;
+    const preview = previewRef.current;
+    if (!article || !preview || csvPreview) return;
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest("a");
+      if (!a) return;
+      const href = a.getAttribute("href");
+      if (!href?.startsWith("#")) return;
+      e.preventDefault();
+      const id = decodeURIComponent(href.slice(1));
+      const target = article.querySelector(`[id="${CSS.escape(id)}"]`) ?? article.querySelector(`[id="${id}"]`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    article.addEventListener("click", onClick);
+    return () => article.removeEventListener("click", onClick);
+  }, [html, csvPreview]);
+
   if (!csvPreview && source.trim().length === 0) {
     return (
       <div className="mdv-preview" data-theme={theme}>
@@ -182,7 +201,7 @@ export function Preview({ source, filePath }: PreviewProps) {
   }
 
   return (
-    <div className="mdv-preview" data-theme={theme}>
+    <div ref={previewRef} className="mdv-preview" data-theme={theme}>
       {csvPreview ? (
         <CsvPreview source={source} fileName={filePath ? basename(filePath) : undefined} />
       ) : (

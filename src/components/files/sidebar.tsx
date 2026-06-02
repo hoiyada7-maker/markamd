@@ -38,7 +38,6 @@ type SidebarProps = {
 };
 
 const MIN_WIDTH = 180;
-const MAX_WIDTH = 420;
 
 export function Sidebar({
   open,
@@ -89,7 +88,7 @@ export function Sidebar({
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return;
       const delta = e.clientX - startXRef.current;
-      const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidthRef.current + delta));
+      const next = Math.max(MIN_WIDTH, startWidthRef.current + delta);
       onWidthChange(next);
     },
     [onWidthChange],
@@ -262,6 +261,7 @@ export function Sidebar({
                     onSelect={onSelectFile}
                     onToggleFavorite={(p) => onToggleFavorite?.(p)}
                     onReorder={(from, to) => onReorderFavorites?.(from, to)}
+                    onContextMenu={onContextMenu}
                   />
                 ) : null}
                 {folders.map((folder) => (

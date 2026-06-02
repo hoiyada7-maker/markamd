@@ -84,7 +84,11 @@ export function FileTree({
   const showNewEntryHere = newEntry && newEntry.parent === rootPath;
 
   return (
-    <ul className="mdv-tree" role={depth === 0 ? "tree" : "group"}>
+    <ul
+      className="mdv-tree"
+      role={depth === 0 ? "tree" : "group"}
+      style={depth > 0 ? ({ "--tree-depth": depth } as React.CSSProperties) : undefined}
+    >
       {showNewEntryHere && newEntry && onSubmitNew && onCancelNew ? (
         <EditableRow
           key="__new__"

@@ -259,7 +259,6 @@
 }
 
 .mdv-tree .mdv-tree {
-  margin-left: 14px;
   padding-left: 0;
 }
 
@@ -268,7 +267,7 @@
   position: absolute;
   top: 0;
   bottom: 4px;
-  left: 6px;
+  left: calc(14px + (var(--tree-depth, 1) - 1) * 12px);
   width: 1px;
   background: color-mix(in srgb, var(--border) 72%, transparent);
   pointer-events: none;
