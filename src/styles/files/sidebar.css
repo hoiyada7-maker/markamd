@@ -40,9 +40,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 8px 8px 8px 12px;
+  padding: 6px 8px 6px 12px;
   border-bottom: 1px solid var(--border);
-  min-height: 36px;
+  min-height: 34px;
 }
 
 .mdv-sidebar__title {
@@ -262,7 +262,8 @@
   padding-left: 0;
 }
 
-.mdv-tree .mdv-tree::before {
+/* vertical guide line — applies to all depths inside a root folder */
+.mdv-rootfolder .mdv-tree::before {
   content: "";
   position: absolute;
   top: 0;
@@ -300,9 +301,6 @@
   padding: 4px 34px 4px 8px;
 }
 
-.mdv-tree__row:hover {
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
-}
 
 .mdv-tree__row.is-active {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
@@ -600,13 +598,13 @@
 
 /* ── multi-folder roots + favorites ─────────────────────────────── */
 .mdv-rootfolder {
-  margin: 4px 0 8px;
+  margin: 0;
   border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   background: transparent;
 }
 
-.mdv-rootfolder + .mdv-rootfolder {
-  margin-top: 10px;
+.mdv-rootfolder.mdv-favorites {
+  border-top: none;
 }
 
 .mdv-rootfolder__header {
@@ -614,25 +612,10 @@
   align-items: center;
   gap: 0;
   min-height: 34px;
-  margin-top: 2px;
+  margin-top: 0;
   padding-right: 6px;
   position: relative;
   z-index: 0;
-}
-
-.mdv-rootfolder__header::before {
-  content: "";
-  position: absolute;
-  inset: 0 1px;
-  border-radius: 4px;
-  background: transparent;
-  transition: background var(--dur-fast) var(--easing);
-  pointer-events: none;
-  z-index: -1;
-}
-
-.mdv-rootfolder__header:hover::before {
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
 }
 
 .mdv-rootfolder__header.is-drop-target {
