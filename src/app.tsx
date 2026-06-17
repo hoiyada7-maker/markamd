@@ -429,6 +429,14 @@ export function App() {
     setStagedPaths([]);
   }, [rootPath]);
 
+  // Keep the webview document title in sync with the active file. On Windows the
+  // native Ctrl+P prints the app window, and the browser derives the save-as-PDF
+  // default name from document.title — so this drives the exported file name.
+  useEffect(() => {
+    const tabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
+    document.title = (tabTitle ?? "untitled").replace(/\.md$/i, "");
+  }, [tabs, activeTabId]);
+
   useEffect(() => {
     let cancelled = false;
     void getVersion()
