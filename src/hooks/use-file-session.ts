@@ -69,10 +69,10 @@ type UseFileSessionResult = {
 export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFileSessionResult {
   const [source, setSource] = useState<string>(DEMO_MARKDOWN);
   const [savedContent, setSavedContent] = useState<string>(DEMO_MARKDOWN);
-  const [activePath, setActivePath] = usePersistedState<string | null>(
-    STORAGE_KEYS.lastFile,
-    null,
-  );
+  // Not persisted: startup always shows the demo buffer (content is never
+  // reloaded from disk), so a restored path would leave the tab/breadcrumb
+  // showing a stale name and let Ctrl+S overwrite an unrelated file.
+  const [activePath, setActivePath] = useState<string | null>(null);
   const [rootPath, setRootPath] = usePersistedState<string | null>(
     STORAGE_KEYS.lastFolder,
     null,

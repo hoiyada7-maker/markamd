@@ -141,16 +141,20 @@ export class PdfExportError extends Error {
 type ExportOpts = {
   source: string;
   activePath: string | null;
+  /** active tab title — drives the PDF document name (browser save-as default) */
+  documentName?: string;
 };
 
 /** Export markdown as self-contained print HTML and open in browser to save as PDF. */
-export async function exportPreviewToPdf({ source, activePath }: ExportOpts): Promise<void> {
+export async function exportPreviewToPdf({ source, activePath, documentName }: ExportOpts): Promise<void> {
   if (!source.trim()) {
     throw new PdfExportError("empty", "nothing to export. open or write some markdown first.");
   }
 
-  const fileName = activePath ? basename(activePath) : undefined;
-  const title = fileName ? fileName.replace(/\.md$/i, "") : "marka.md export";
+  // Prefer the file name; fall back to the tab title (e.g. "untitled") so the
+  // browser's save-as-PDF default is never the literal "marka.md export".
+  const fileName = activePath ? basename(activePath) : documentName;
+  const title = (fileName ?? "export").replace(/\.md$/i, "");
 
   // Always render with latte for PDF — guarantees light, readable colors on
   // white paper regardless of the user's current app theme. Lazy-loads the

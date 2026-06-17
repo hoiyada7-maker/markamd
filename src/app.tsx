@@ -304,7 +304,8 @@ export function App() {
 
   const exportToPdf = useCallback(async () => {
     try {
-      await exportPreviewToPdf({ source, activePath });
+      const documentName = tabs.find((tab) => tab.id === activeTabId)?.title;
+      await exportPreviewToPdf({ source, activePath, documentName });
     } catch (err) {
       const message = err instanceof PdfExportError
         ? err.message
@@ -312,7 +313,7 @@ export function App() {
       console.error("marka.md: pdf export failed", err);
       setLoadError({ message });
     }
-  }, [source, activePath, setLoadError, t]);
+  }, [source, activePath, tabs, activeTabId, setLoadError, t]);
 
 
   const toggleFullscreen = useCallback(async () => {
