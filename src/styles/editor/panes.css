@@ -131,6 +131,11 @@
   background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
+.mdv-tab.is-drag-over {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 /* editor-only mode (#28) — preview pane hidden, editor fills remaining width */
 .mdv-shell__editor-solo {
   flex: 1;

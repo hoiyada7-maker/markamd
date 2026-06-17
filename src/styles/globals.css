@@ -180,6 +180,59 @@ body.mdv-print .mdv-prose a {
 }
 
 @media print {
-  @page { margin: 16mm; }
+  @page {
+    margin: 16mm 16mm 20mm;
+    /* Clear browser-generated headers/footers (date, title, URL) */
+    @top-left    { content: ''; }
+    @top-center  { content: ''; }
+    @top-right   { content: ''; }
+    @bottom-left { content: ''; }
+    @bottom-right { content: ''; }
+    /* Page number centered at bottom */
+    @bottom-center {
+      content: counter(page);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 10px;
+      color: #888888;
+    }
+  }
   body { background: #fff !important; }
+
+  .mdv-titlebar,
+  .mdv-breadcrumb,
+  .mdv-statusbar,
+  .mdv-sidebar,
+  .mdv-tabs,
+  .mdv-splitter__handle,
+  .mdv-splitter__pane:first-child,
+  .mdv-toast,
+  .mdv-overlay,
+  .mdv-overlay__backdrop,
+  .mdv-drop,
+  .mdv-tooltip,
+  .mdv-popover {
+    display: none !important;
+  }
+
+  .mdv-app,
+  .mdv-shell,
+  .mdv-splitter,
+  .mdv-splitter__pane:last-child,
+  .mdv-preview {
+    display: block !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+
+  .mdv-prose {
+    max-width: 100% !important;
+    padding: 24px 32px !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
 }

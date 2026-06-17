@@ -109,6 +109,7 @@ export function App() {
     activeTabId,
     switchTab,
     closeTab,
+    reorderTabs,
     rootPath,
     setRootPath,
     saveStatus,
@@ -175,12 +176,10 @@ export function App() {
     if (activePath && isPathWithin(activePath, path)) {
       startNewBuffer();
     }
-    setFavorites((prev) => prev.filter((favorite) => !isPathWithin(favorite, path)));
   }, [
     activePath,
     folders,
     isPathWithin,
-    setFavorites,
     setFolders,
     setRootPath,
     startNewBuffer,
@@ -891,6 +890,7 @@ export function App() {
                 activeTabId={activeTabId}
                 onSelect={switchTab}
                 onClose={handleCloseTab}
+                onReorder={reorderTabs}
                 onContextMenu={(e, path) => handleContextMenu(e, { path, name: basename(path), isDir: false })}
               />
               {editorOnly ? (

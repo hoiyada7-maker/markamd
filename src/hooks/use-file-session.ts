@@ -42,6 +42,7 @@ type UseFileSessionResult = {
   activeTabId: string;
   switchTab: (id: string) => void;
   closeTab: (id: string) => void;
+  reorderTabs: (from: number, to: number) => void;
   rootPath: string | null;
   setRootPath: (v: string | null | ((p: string | null) => string | null)) => void;
   saveStatus: SaveStatus;
@@ -170,6 +171,16 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     setSaveStatus(next.source === next.savedContent ? "idle" : "dirty");
   }, [snapshotActiveTab, setActivePath, tabs]);
 
+  const reorderTabs = useCallback((from: number, to: number) => {
+    setTabs((prev) => {
+      if (from === to || from < 0 || to < 0 || from >= prev.length || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, []);
+
   const closeTab = useCallback((id: string) => {
     const current = snapshotActiveTab(tabs);
     const closingIndex = current.findIndex((tab) => tab.id === id);
@@ -207,8 +218,8 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     async (path: string) => {
       const seq = ++loadSeq.current;
       const existing = snapshotActiveTab(tabs).find((tab) => tab.path === path);
-      if (existing && activePathRef.current !== path) {
-        switchTab(existing.id);
+      if (existing) {
+        if (activePathRef.current !== path) switchTab(existing.id);
         return;
       }
       const check = await validateSupportedTextFile(path);
@@ -315,6 +326,11 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
 
   const loadPlainTextFile = useCallback(async (path: string) => {
     const seq = ++loadSeq.current;
+    const existing = snapshotActiveTab(tabs).find((tab) => tab.path === path);
+    if (existing) {
+      if (activePathRef.current !== path) switchTab(existing.id);
+      return;
+    }
     const check = await validatePlainTextFile(path);
     if (seq !== loadSeq.current) return;
     if (!check.ok) {
@@ -342,7 +358,7 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
       console.error("marka.md: loadPlainTextFile failed", err);
       onLoadError?.({ message: String(err), path });
     }
-  }, [makeTabId, setActivePath, setRecentFiles, onLoadError, snapshotActiveTab, titleForPath]);
+  }, [makeTabId, setActivePath, setRecentFiles, onLoadError, snapshotActiveTab, switchTab, tabs, titleForPath]);
 
   const saveAs = useCallback(async (): Promise<string | null> => {
     const defaultPath = activePath
@@ -424,6 +440,7 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     activeTabId,
     switchTab,
     closeTab,
+    reorderTabs,
     rootPath,
     setRootPath,
     saveStatus,
