@@ -1,6 +1,14 @@
 import { Check, Copy, FileDown, Minimize2 } from "lucide-react";
 import { Button, Icon } from "@/components/primitives";
-import { shortcutLabel, startWindowDrag, useI18n } from "@/lib";
+import {
+  shortcutLabel,
+  startWindowDrag,
+  useI18n,
+  type WritingDisplay,
+  type WritingFontSize,
+  type WritingLineHeight,
+} from "@/lib";
+import { ThemeButton } from "./theme-button";
 
 type TitleBarProps = {
   fileName?: string;
@@ -11,6 +19,12 @@ type TitleBarProps = {
   onCopyMarkdown?: () => void;
   copyPulse?: boolean;
   onExportPdf?: () => void;
+  vimOn?: boolean;
+  onToggleVim?: () => void;
+  writingDisplay: WritingDisplay;
+  onWritingFontSizeChange: (value: WritingFontSize) => void;
+  onWritingLineHeightChange: (value: WritingLineHeight) => void;
+  onResetWritingDisplay: () => void;
 };
 
 export function TitleBar({
@@ -22,6 +36,12 @@ export function TitleBar({
   onCopyMarkdown,
   copyPulse = false,
   onExportPdf,
+  vimOn,
+  onToggleVim,
+  writingDisplay,
+  onWritingFontSizeChange,
+  onWritingLineHeightChange,
+  onResetWritingDisplay,
 }: TitleBarProps) {
   const { t } = useI18n();
 
@@ -49,6 +69,16 @@ export function TitleBar({
       </div>
 
       <div className="mdv-titlebar__actions" data-tauri-drag-region>
+        {readingMode ? (
+          <ThemeButton
+            vimOn={vimOn}
+            onToggleVim={onToggleVim}
+            writingDisplay={writingDisplay}
+            onWritingFontSizeChange={onWritingFontSizeChange}
+            onWritingLineHeightChange={onWritingLineHeightChange}
+            onResetWritingDisplay={onResetWritingDisplay}
+          />
+        ) : null}
         {readingMode && onCopyMarkdown ? (
           <button
             type="button"

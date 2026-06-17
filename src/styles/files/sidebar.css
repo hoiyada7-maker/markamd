@@ -559,10 +559,6 @@
   min-height: 42px;
   padding: 7px 8px 7px 12px;
   border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 62%, transparent);
-}
-
-.mdv-context-tray.has-files {
   background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
 
@@ -610,11 +606,6 @@
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
-}
-
-.mdv-context-tray__actions .mdv-btn:disabled {
-  opacity: 0.42;
-  cursor: default;
 }
 
 /* ── multi-folder roots + favorites ─────────────────────────────── */

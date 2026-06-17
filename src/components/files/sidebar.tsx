@@ -349,8 +349,8 @@ export function Sidebar({
             </>
           )}
         </div>
-        {rootPath ? (
-          <footer className={`mdv-context-tray${stagedPaths.length > 0 ? " has-files" : ""}`}>
+        {rootPath && stagedPaths.length > 0 ? (
+          <footer className="mdv-context-tray">
             <div className="mdv-context-tray__meta">
               <span className="mdv-context-tray__label">{t("sidebar.context")}</span>
               <span className="mdv-context-tray__count">
@@ -364,14 +364,12 @@ export function Sidebar({
               <Button
                 data-tooltip={t("sidebar.copyContext")}
                 aria-label={t("sidebar.copyContext")}
-                disabled={stagedPaths.length === 0}
                 onClick={onCopyContext}
                 icon={<Icon icon={Copy} size={12} strokeWidth={1.6} />}
               />
               <Button
                 data-tooltip={t("sidebar.clearContext")}
                 aria-label={t("sidebar.clearContext")}
-                disabled={stagedPaths.length === 0}
                 onClick={onClearContext}
                 icon={<Icon icon={Trash2} size={12} strokeWidth={1.6} />}
               />

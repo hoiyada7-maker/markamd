@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, FileText, FolderOpen, Globe, Layers3, Palette, Star, Table2, X } from "lucide-react";
+import { Download, FileText, FolderOpen, Globe, Layers3, Palette, Star, Table2, Workflow, X } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Button, Icon, Overlay } from "@/components/primitives";
@@ -20,6 +20,7 @@ const FEATURES = [
   { icon: Layers3, label: "context", detail: "bundle for ai" },
   { icon: FolderOpen, label: "files", detail: "copy paths + reveal" },
   { icon: Table2, label: "csv", detail: "quick table view" },
+  { icon: Workflow, label: "plantuml", detail: "load diagrams on demand" },
   { icon: Palette, label: "themes", detail: "calm palettes" },
 ];
 

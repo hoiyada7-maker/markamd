@@ -4,6 +4,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { ensureMarkdownReady, renderMarkdown, useI18n, useTheme } from "@/lib";
 import inspectUrl from "@/assets/mascot/inspect.png";
 import { renderMermaidBlocks } from "@/lib/mermaid";
+import { decoratePlantUmlBlocks } from "@/lib/plantuml";
 import { basename, isCsvPath } from "@/lib";
 import { CsvPreview } from "./csv-preview";
 import {
@@ -130,10 +131,10 @@ export function Preview({ source, filePath }: PreviewProps) {
     open: t("diagram.openViewer"),
   }), [t]);
 
-  const openMermaidViewer = useCallback((next: DiagramViewerSource) => {
+  const openDiagramViewer = useCallback((next: DiagramViewerSource) => {
     setViewer(createDiagramViewer(next));
   }, []);
-  const closeMermaidViewer = useCallback(() => setViewer(null), []);
+  const closeDiagramViewer = useCallback(() => setViewer(null), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -173,8 +174,13 @@ export function Preview({ source, filePath }: PreviewProps) {
 
   useEffect(() => {
     if (!articleRef.current || csvPreview) return;
-    return decorateCodeBlocks(articleRef.current);
-  }, [html, csvPreview]);
+    const cleanupCode = decorateCodeBlocks(articleRef.current);
+    const cleanupPlantUml = decoratePlantUmlBlocks(articleRef.current, openDiagramViewer, viewerLabels);
+    return () => {
+      cleanupCode();
+      cleanupPlantUml();
+    };
+  }, [html, csvPreview, openDiagramViewer, viewerLabels]);
 
   useEffect(() => {
     if (!articleRef.current || csvPreview) return;
@@ -183,13 +189,13 @@ export function Preview({ source, filePath }: PreviewProps) {
     let cleanup = () => {};
     void renderMermaidBlocks(articleRef.current, mermaidTheme).then(() => {
       if (cancelled || !articleRef.current) return;
-      cleanup = decorateMermaidBlocks(articleRef.current, openMermaidViewer, viewerLabels);
+      cleanup = decorateMermaidBlocks(articleRef.current, openDiagramViewer, viewerLabels);
     });
     return () => {
       cancelled = true;
       cleanup();
     };
-  }, [html, theme, csvPreview, openMermaidViewer, viewerLabels]);
+  }, [html, theme, csvPreview, openDiagramViewer, viewerLabels]);
 
   useEffect(() => {
     const article = articleRef.current;
@@ -251,7 +257,7 @@ export function Preview({ source, filePath }: PreviewProps) {
         <DiagramViewerOverlay
           viewer={viewer}
           onChange={setViewer}
-          onClose={closeMermaidViewer}
+          onClose={closeDiagramViewer}
         />
       ) : null}
     </>
