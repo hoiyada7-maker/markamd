@@ -150,7 +150,7 @@ export async function exportPreviewToPdf({ source, activePath }: ExportOpts): Pr
   }
 
   const fileName = activePath ? basename(activePath) : undefined;
-  const title = "marka.md export";
+  const title = fileName ? fileName.replace(/\.md$/i, "") : "marka.md export";
 
   // Always render with latte for PDF — guarantees light, readable colors on
   // white paper regardless of the user's current app theme. Lazy-loads the

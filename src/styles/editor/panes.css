@@ -131,6 +131,15 @@
   background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
+.mdv-tabs.is-reordering {
+  user-select: none;
+  cursor: grabbing;
+}
+
+.mdv-tab.is-dragging {
+  opacity: 0.5;
+}
+
 .mdv-tab.is-drag-over {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
