@@ -319,7 +319,7 @@
 }
 
 .mdv-tree__row--file {
-  padding: 4px 34px 4px 8px;
+  padding: 4px 42px 4px 8px;
 }
 
 
@@ -619,7 +619,8 @@
   border-top: none;
 }
 
-.mdv-favorites .mdv-tree::before {
+.mdv-favorites .mdv-tree::before,
+.mdv-pinned-files .mdv-tree::before {
   display: none;
 }
 
@@ -732,17 +733,17 @@
 
 /* favorite (star) toggle — sits to the right of the stage button */
 .mdv-tree__row--file.has-fav {
-  padding-right: 54px;
+  padding-right: 62px;
 }
 
 .mdv-tree__stage.has-fav {
-  right: 28px;
+  right: 36px;
 }
 
 .mdv-tree__fav {
   position: absolute;
   top: 50%;
-  right: 8px;
+  right: 16px;
   transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
