@@ -30,6 +30,36 @@ fn initial_open_files_from_args() -> Vec<String> {
 }
 
 #[tauri::command]
+fn pick_folder_with_hidden() -> Option<String> {
+    #[cfg(target_os = "linux")]
+    {
+        let script = r#"
+import sys, gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+dialog = Gtk.FileChooserDialog(title='Open Folder', action=Gtk.FileChooserAction.SELECT_FOLDER)
+dialog.add_buttons('Cancel', Gtk.ResponseType.CANCEL, 'Open', Gtk.ResponseType.ACCEPT)
+dialog.set_show_hidden(True)
+response = dialog.run()
+if response == Gtk.ResponseType.ACCEPT:
+    print(dialog.get_filename())
+dialog.destroy()
+"#;
+        let output = std::process::Command::new("python3")
+            .args(["-c", script])
+            .output()
+            .ok()?;
+        if output.status.success() {
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !path.is_empty() {
+                return Some(path);
+            }
+        }
+    }
+    None
+}
+
+#[tauri::command]
 fn reveal_in_file_manager(path: String) {
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     let p = std::path::Path::new(&path);
@@ -111,7 +141,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
-        .invoke_handler(tauri::generate_handler![take_pending_open_files, reveal_in_file_manager])
+        .invoke_handler(tauri::generate_handler![take_pending_open_files, reveal_in_file_manager, pick_folder_with_hidden])
         .setup(|_app| {
             #[cfg(target_os = "macos")]
             {

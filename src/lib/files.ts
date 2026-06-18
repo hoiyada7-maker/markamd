@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readDir, readFile, readTextFile, writeTextFile, exists, stat, rename, mkdir, remove } from "@tauri-apps/plugin-fs";
 import { isCsvPath } from "./csv";
@@ -9,6 +10,8 @@ export type FileEntry = {
 };
 
 export async function pickFolder(): Promise<string | null> {
+  const nativePath = await invoke<string | null>("pick_folder_with_hidden").catch(() => null);
+  if (typeof nativePath === "string") return nativePath;
   const result = await open({
     directory: true,
     multiple: false,
