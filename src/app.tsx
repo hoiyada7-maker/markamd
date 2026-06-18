@@ -363,6 +363,7 @@ export function App() {
 
   // ⌘F only bound while reading — CM owns it in editor mode.
   const [findOpen, setFindOpen] = useState(false);
+  const [findFocusRequest, setFindFocusRequest] = useState(0);
   const [proseEl, setProseEl] = useState<HTMLElement | null>(null);
   useEffect(() => {
     if (!readingMode) {
@@ -716,6 +717,7 @@ export function App() {
             "mod+f": (e: KeyboardEvent) => {
               e.preventDefault();
               setFindOpen(true);
+              setFindFocusRequest((v) => v + 1);
             },
           }
         : {}),
@@ -865,6 +867,7 @@ export function App() {
             <Preview source={debouncedPreview} filePath={activePath} />
             <ReadingFind
               open={findOpen}
+              focusRequest={findFocusRequest}
               onClose={() => setFindOpen(false)}
               scope={proseEl}
               contentKey={debouncedPreview}
