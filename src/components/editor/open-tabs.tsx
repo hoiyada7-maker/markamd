@@ -151,6 +151,7 @@ export function OpenTabs({ tabs, activeTabId, onSelect, onClose, onReorder, onCo
               className="mdv-tab__close"
               aria-label={t("tabs.close", { name: tab.title })}
               data-tooltip={t("tabs.close", { name: tab.title })}
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={() => onClose(tab.id)}
             >
               <Icon icon={X} size={13} strokeWidth={1.8} />

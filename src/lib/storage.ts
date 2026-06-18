@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   sidebarOpen: "mdview.sidebar.open",
   sidebarWidth: "mdview.sidebar.width",
   lastFolder: "mdview.lastFolder",
+  lastFile: "mdview.lastFile",
   welcomed: "mdview.welcomed",
   lastSeenVersion: "mdview.lastSeenVersion",
   recentFiles: "mdview.recent.files",
