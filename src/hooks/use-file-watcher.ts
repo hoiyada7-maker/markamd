@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { stat } from "@tauri-apps/plugin-fs";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 /**
- * Polls mtime every 2s. Pauses on blur, resumes on focus.
- * Picked over tauri-plugin-fs-watch: md files are cheap, no new rust deps.
+ * Polls mtime every 2s. Pauses on native window blur, resumes on focus.
+ * Uses Tauri's onFocusChanged (native OS event) instead of DOM focus/blur,
+ * which is unreliable in WebKit2GTK on Linux.
  */
 export function useFileWatcher(path: string | null, onChange: () => void): void {
   useEffect(() => {
@@ -11,20 +13,18 @@ export function useFileWatcher(path: string | null, onChange: () => void): void 
     let lastMtime: number | null = null;
     let active = true;
     let intervalId: number | null = null;
+    let unlistenFocus: (() => void) | null = null;
 
     const check = async () => {
       if (!active) return;
       try {
         const meta = await stat(path);
         const m = meta.mtime ? new Date(meta.mtime).getTime() : null;
-        // first read seeds lastMtime without firing onChange — only later ticks
-        // count as "external changes".
         if (lastMtime !== null && m !== null && m !== lastMtime) {
           onChange();
         }
         lastMtime = m;
       } catch {
-        // file deleted / unreadable — stop polling cleanly, no error spam
         active = false;
         if (intervalId !== null) {
           window.clearInterval(intervalId);
@@ -45,24 +45,25 @@ export function useFileWatcher(path: string | null, onChange: () => void): void 
       }
     };
 
-    const onFocus = () => {
-      startInterval();
-      void check();
-    };
-    const onBlur = () => {
-      stopInterval();
-    };
-
-    void check(); // seed lastMtime
+    void check();
     startInterval();
-    window.addEventListener("focus", onFocus);
-    window.addEventListener("blur", onBlur);
+
+    void getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+      if (!active) return;
+      if (focused) {
+        startInterval();
+        void check();
+      } else {
+        stopInterval();
+      }
+    }).then((unlisten) => {
+      unlistenFocus = unlisten;
+    });
 
     return () => {
       active = false;
       stopInterval();
-      window.removeEventListener("focus", onFocus);
-      window.removeEventListener("blur", onBlur);
+      unlistenFocus?.();
     };
   }, [path, onChange]);
 }
