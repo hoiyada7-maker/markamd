@@ -178,5 +178,8 @@
   "diagram.actualSize": "実寸",
   "tabs.openFiles": "開いているファイル",
   "tabs.close": "{name} を閉じる",
+  "tabs.closeThis": "閉じる",
+  "tabs.closeOthers": "他のタブを閉じる",
+  "tabs.closeToRight": "右側のタブを閉じる",
   "tabs.closeUnsaved": "未保存の変更がある「{name}」を閉じますか？"
 }

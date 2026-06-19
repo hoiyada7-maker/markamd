@@ -216,5 +216,8 @@
   "diagram.actualSize": "actual size",
   "tabs.openFiles": "open files",
   "tabs.close": "close {name}",
+  "tabs.closeThis": "Close",
+  "tabs.closeOthers": "Close other tabs",
+  "tabs.closeToRight": "Close tabs to the right",
   "tabs.closeUnsaved": "Close \"{name}\" with unsaved changes?"
 }

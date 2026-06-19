@@ -178,5 +178,8 @@
   "diagram.actualSize": "Originalgröße",
   "tabs.openFiles": "geöffnete Dateien",
   "tabs.close": "{name} schließen",
+  "tabs.closeThis": "Schließen",
+  "tabs.closeOthers": "Andere Tabs schließen",
+  "tabs.closeToRight": "Tabs rechts schließen",
   "tabs.closeUnsaved": "\"{name}\" mit ungespeicherten Änderungen schließen?"
 }

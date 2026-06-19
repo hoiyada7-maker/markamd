@@ -17,7 +17,7 @@ type OpenTabsProps = {
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onReorder?: (from: number, to: number) => void;
-  onContextMenu?: (e: React.MouseEvent, path: string) => void;
+  onContextMenu?: (e: React.MouseEvent, tabId: string) => void;
 };
 
 // px the pointer must travel before a press becomes a reorder drag
@@ -127,9 +127,9 @@ export function OpenTabs({ tabs, activeTabId, onSelect, onClose, onReorder, onCo
             className={`mdv-tab${active ? " is-active" : ""}${dirty ? " is-dirty" : ""}${dragging ? " is-dragging" : ""}${isDragOver ? " is-drag-over" : ""}`}
             title={tab.path ?? tab.title}
             onPointerDown={(e) => onTabPointerDown(e, tabIndex)}
-            onContextMenu={tab.path && onContextMenu ? (e: ReactMouseEvent) => {
+            onContextMenu={onContextMenu ? (e: ReactMouseEvent) => {
               e.preventDefault();
-              onContextMenu(e, tab.path!);
+              onContextMenu(e, tab.id);
             } : undefined}
           >
             <button

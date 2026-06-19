@@ -178,5 +178,8 @@
   "diagram.actualSize": "dimensione reale",
   "tabs.openFiles": "file aperti",
   "tabs.close": "chiudi {name}",
+  "tabs.closeThis": "Chiudi",
+  "tabs.closeOthers": "Chiudi le altre schede",
+  "tabs.closeToRight": "Chiudi le schede a destra",
   "tabs.closeUnsaved": "Chiudere \"{name}\" con modifiche non salvate?"
 }

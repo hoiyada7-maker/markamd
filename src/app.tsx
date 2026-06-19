@@ -111,6 +111,8 @@ export function App() {
     activeTabId,
     switchTab,
     closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
     reorderTabs,
     rootPath,
     setRootPath,
@@ -256,6 +258,7 @@ export function App() {
   } = useOverlays();
 
   const { contextMenu, handleContextMenu, closeContextMenu } = useContextMenu();
+  const [tabContextMenu, setTabContextMenu] = useState<{ x: number; y: number; tabId: string } | null>(null);
 
   const {
     updateAvail,
@@ -464,7 +467,7 @@ export function App() {
 
   // line-anchor editor <-> preview scroll sync; rebinds when active file changes
   useSyncScroll({ viewRef: editorViewRef, rebindKey: activePath ?? "untitled" });
-  useScrollMemory(activePath);
+  useScrollMemory(activePath, editorViewRef);
   useSelectionSyncText(editorViewRef, activePath ?? "untitled");
 
   const { words, minutes, docTokens } = useMemo(() => {
@@ -914,7 +917,10 @@ export function App() {
                 onSelect={switchTab}
                 onClose={handleCloseTab}
                 onReorder={reorderTabs}
-                onContextMenu={(e, path) => handleContextMenu(e, { path, name: basename(path), isDir: false })}
+                onContextMenu={(e, tabId) => {
+                  e.preventDefault();
+                  setTabContextMenu({ x: e.clientX, y: e.clientY, tabId });
+                }}
               />
               {editorOnly ? (
                 <div className="mdv-shell__editor-solo">
@@ -1079,6 +1085,28 @@ export function App() {
         y={contextMenu?.y ?? 0}
         items={contextItems}
         onClose={closeContextMenu}
+      />
+
+      <ContextMenu
+        open={tabContextMenu != null}
+        x={tabContextMenu?.x ?? 0}
+        y={tabContextMenu?.y ?? 0}
+        onClose={() => setTabContextMenu(null)}
+        items={tabContextMenu ? [
+          {
+            label: t("tabs.closeThis"),
+            onSelect: () => { handleCloseTab(tabContextMenu.tabId); setTabContextMenu(null); },
+          },
+          "divider",
+          {
+            label: t("tabs.closeOthers"),
+            onSelect: () => { closeOtherTabs(tabContextMenu.tabId); setTabContextMenu(null); },
+          },
+          {
+            label: t("tabs.closeToRight"),
+            onSelect: () => { closeTabsToRight(tabContextMenu.tabId); setTabContextMenu(null); },
+          },
+        ] : []}
       />
 
       <StatusBar
