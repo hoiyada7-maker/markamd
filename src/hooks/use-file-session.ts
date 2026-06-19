@@ -69,8 +69,7 @@ type UseFileSessionResult = {
 };
 
 export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFileSessionResult {
-  const [source, setSource] = useState<string>(DEMO_MARKDOWN);
-  const [savedContent, setSavedContent] = useState<string>(DEMO_MARKDOWN);
+  // Persisted state first so source/tabs can reference activePath in their initializers.
   const [activePath, setActivePath] = usePersistedState<string | null>(
     STORAGE_KEYS.lastFile,
     null,
@@ -79,6 +78,10 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     STORAGE_KEYS.lastFolder,
     null,
   );
+  // When a file was open last session, start with empty content (file loads async).
+  // Show DEMO_MARKDOWN only when there is no previously open file.
+  const [source, setSource] = useState<string>(activePath ? "" : DEMO_MARKDOWN);
+  const [savedContent, setSavedContent] = useState<string>(activePath ? "" : DEMO_MARKDOWN);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [recentFiles, setRecentFiles] = usePersistedState<string[]>(
     STORAGE_KEYS.recentFiles,
@@ -92,10 +95,10 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
   const [tabs, setTabs] = useState<FileTab[]>([
     {
       id: INITIAL_TAB_ID,
-      path: null,
-      title: UNTITLED_TITLE,
-      source: DEMO_MARKDOWN,
-      savedContent: DEMO_MARKDOWN,
+      path: activePath,
+      title: activePath ? basename(activePath) : UNTITLED_TITLE,
+      source: activePath ? "" : DEMO_MARKDOWN,
+      savedContent: activePath ? "" : DEMO_MARKDOWN,
     },
   ]);
 
@@ -427,6 +430,9 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
   useFileWatcher(activePath, handleExternalChange);
 
   // mount-only: restore last open file from persisted activePath.
+  // We read the file directly (bypassing loadFile) because loadFile creates a NEW
+  // tab and would early-exit if a tab with this path already exists — which it does,
+  // since the initial tab is pre-populated with activePath in its initializer above.
   useEffect(() => {
     if (!activePath) return;
     let cancelled = false;
@@ -435,13 +441,36 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
         const exists = await pathExists(activePath);
         if (cancelled) return;
         if (exists) {
-          void loadFile(activePath);
+          const content = await readMarkdown(activePath);
+          if (cancelled) return;
+          setSource(content);
+          setSavedContent(content);
+          setTabs((prev) => prev.map((tab) =>
+            tab.id === INITIAL_TAB_ID
+              ? { ...tab, source: content, savedContent: content }
+              : tab
+          ));
+          setSaveStatus("idle");
+          setRecentFiles((prev) => [activePath, ...prev.filter((p) => p !== activePath)].slice(0, 8));
         } else {
+          // File no longer exists — show the welcome demo instead.
+          setSource(DEMO_MARKDOWN);
+          setSavedContent(DEMO_MARKDOWN);
           setActivePath(null);
+          setTabs((prev) => prev.map((tab) =>
+            tab.id === INITIAL_TAB_ID
+              ? { ...tab, path: null, title: UNTITLED_TITLE, source: DEMO_MARKDOWN, savedContent: DEMO_MARKDOWN }
+              : tab
+          ));
+          setSaveStatus("idle");
         }
       } catch (err) {
         console.warn("marka.md: session restore failed", err);
-        if (!cancelled) setActivePath(null);
+        if (!cancelled) {
+          setSource(DEMO_MARKDOWN);
+          setSavedContent(DEMO_MARKDOWN);
+          setActivePath(null);
+        }
       }
     })();
     return () => {
