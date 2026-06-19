@@ -479,6 +479,19 @@
   white-space: pre;
 }
 
+/* claude theme: sequence diagram arrows and message text in accent color */
+[data-theme="claude"] .mdv-mermaid svg .messageLine0,
+[data-theme="claude"] .mdv-mermaid svg .messageLine1 {
+  stroke: var(--accent) !important;
+}
+[data-theme="claude"] .mdv-mermaid svg .messageText {
+  fill: var(--accent) !important;
+}
+[data-theme="claude"] .mdv-mermaid svg marker path {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+}
+
 .mdv-prose blockquote {
   border-left: 2px solid var(--accent);
   padding: 2px 0 2px 14px;

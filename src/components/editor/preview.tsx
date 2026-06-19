@@ -184,7 +184,8 @@ export function Preview({ source, filePath }: PreviewProps) {
 
   useEffect(() => {
     if (!articleRef.current || csvPreview) return;
-    const mermaidTheme = theme === "latte" || theme === "matcha" ? "default" : "dark";
+    const LIGHT_THEMES = ["latte", "mono", "matcha", "claude", "gemini"] as const;
+    const mermaidTheme = (LIGHT_THEMES as readonly string[]).includes(theme) ? "default" : "dark";
     let cancelled = false;
     let cleanup = () => {};
     void renderMermaidBlocks(articleRef.current, mermaidTheme).then(() => {
