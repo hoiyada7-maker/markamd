@@ -111,6 +111,8 @@ export function App() {
     activeTabId,
     switchTab,
     closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
     reorderTabs,
     rootPath,
     setRootPath,
@@ -239,6 +241,7 @@ export function App() {
   } = useOverlays();
 
   const { contextMenu, handleContextMenu, closeContextMenu } = useContextMenu();
+  const [tabContextMenu, setTabContextMenu] = useState<{ x: number; y: number; tabId: string } | null>(null);
 
   const {
     updateAvail,
@@ -796,6 +799,63 @@ export function App() {
     closeTab(id);
   }, [closeTab, tabs, t]);
 
+  const tabContextItems = useMemo<ContextMenuItem[]>(() => {
+    if (!tabContextMenu) return [];
+    const tab = tabs.find((tb) => tb.id === tabContextMenu.tabId);
+    if (!tab) return [];
+    const { path } = tab;
+    const close = () => setTabContextMenu(null);
+    const items: ContextMenuItem[] = [];
+
+    if (path) {
+      items.push({ label: t("menu.rename"), onSelect: () => { setEditingPath(path); close(); } });
+      items.push("divider");
+      items.push({
+        label: t("menu.copyPath"),
+        onSelect: () => { void navigator.clipboard.writeText(path); showSaveAsToast(t("menu.pathCopied")); close(); },
+      });
+      items.push({
+        label: t("menu.copyRelativePath"),
+        onSelect: () => { void navigator.clipboard.writeText(relativePath(path, rootPath)); showSaveAsToast(t("menu.pathCopied")); close(); },
+      });
+      items.push("divider");
+      items.push({
+        label: t("menu.revealExplorer"),
+        onSelect: () => { void invoke("reveal_in_file_manager", { path }); close(); },
+      });
+      items.push({
+        label: t("menu.openDefault"),
+        onSelect: () => { void openPath(path); close(); },
+      });
+      items.push("divider");
+      items.push({
+        label: t("menu.delete"),
+        destructive: true,
+        onSelect: () => {
+          close();
+          const name = basename(path);
+          if (!window.confirm(t("menu.confirmDelete", { name }))) return;
+          void (async () => {
+            try {
+              await removeEntry(path, false);
+              if (activePath === path) loadDemo();
+              bumpTree();
+            } catch (err) {
+              setLoadError({ message: `couldn't delete: ${String(err)}` });
+            }
+          })();
+        },
+      });
+      items.push("divider");
+    }
+
+    items.push({ label: t("tabs.closeThis"), onSelect: () => { handleCloseTab(tabContextMenu.tabId); close(); } });
+    items.push({ label: t("tabs.closeOthers"), onSelect: () => { closeOtherTabs(tabContextMenu.tabId); close(); } });
+    items.push({ label: t("tabs.closeToRight"), onSelect: () => { closeTabsToRight(tabContextMenu.tabId); close(); } });
+    return items;
+  }, [tabContextMenu, tabs, rootPath, activePath, t, bumpTree, handleCloseTab,
+      closeOtherTabs, closeTabsToRight, setEditingPath, showSaveAsToast, loadDemo, setLoadError]);
+
   return (
     <div
       className={`mdv-app${sidebarOpen ? " has-sidebar" : ""}${readingMode ? " is-reading" : ""}${!titlebarVisible ? " has-hidden-titlebar" : ""}`}
@@ -891,7 +951,10 @@ export function App() {
                 onSelect={switchTab}
                 onClose={handleCloseTab}
                 onReorder={reorderTabs}
-                onContextMenu={(e, path) => handleContextMenu(e, { path, name: basename(path), isDir: false })}
+                onContextMenu={(e, tabId) => {
+                  e.preventDefault();
+                  setTabContextMenu({ x: e.clientX, y: e.clientY, tabId });
+                }}
               />
               {editorOnly ? (
                 <div className="mdv-shell__editor-solo">
@@ -1057,6 +1120,15 @@ export function App() {
         items={contextItems}
         onClose={closeContextMenu}
       />
+
+      <ContextMenu
+        open={tabContextMenu != null}
+        x={tabContextMenu?.x ?? 0}
+        y={tabContextMenu?.y ?? 0}
+        onClose={() => setTabContextMenu(null)}
+        items={tabContextItems}
+      />
+
 
       <StatusBar
         fileName={displayName}
