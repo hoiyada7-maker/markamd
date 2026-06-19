@@ -1,31 +1,35 @@
-import { EditorView } from "@codemirror/view";
 import { useEffect, useRef, type RefObject } from "react";
+import type { EditorView } from "@codemirror/view";
 
-type ScrollMemory = { editorPos: number; preview: number };
+type ScrollPos = { editor: number; preview: number };
 
 export function useScrollMemory(
   activePath: string | null,
   viewRef: RefObject<EditorView | null>,
 ): void {
-  const memory = useRef(new Map<string, ScrollMemory>());
+  const memory = useRef(new Map<string, ScrollPos>());
   const prevPathRef = useRef<string | null>(null);
 
-  // Save editor scroll when leaving a tab (synchronous, before CM6 rAF DOM update)
+  // Capture raw scrollTop when LEAVING a tab.
+  // Runs synchronously during React's effect phase — before CM6's rAF DOM update,
+  // so view.scrollDOM.scrollTop still holds the outgoing tab's scroll position.
+  // We do NOT convert to a document position here: CM6's height map has already
+  // been rebuilt for the INCOMING document (dispatch is synchronous), so
+  // lineBlockAtHeight would give a position in the wrong document.
   useEffect(() => {
     const prev = prevPathRef.current;
     prevPathRef.current = activePath;
     if (!prev || prev === activePath) return;
 
     const view = viewRef.current;
-    if (view) {
-      const scrollTop = view.scrollDOM.scrollTop;
-      const editorPos = view.lineBlockAtHeight(scrollTop).from;
-      const existing = memory.current.get(prev) ?? { editorPos: 0, preview: 0 };
-      memory.current.set(prev, { ...existing, editorPos });
-    }
+    const preview = document.querySelector<HTMLElement>(".mdv-preview");
+    memory.current.set(prev, {
+      editor: view?.scrollDOM.scrollTop ?? 0,
+      preview: preview?.scrollTop ?? 0,
+    });
   }, [activePath, viewRef]);
 
-  // Track preview scroll continuously
+  // Track preview scroll continuously (safe: no CM6 involvement in preview DOM).
   useEffect(() => {
     const path = activePath;
     if (!path) return;
@@ -34,7 +38,7 @@ export function useScrollMemory(
     if (!preview) return;
 
     const onPreviewScroll = () => {
-      const existing = memory.current.get(path) ?? { editorPos: 0, preview: 0 };
+      const existing = memory.current.get(path) ?? { editor: 0, preview: 0 };
       memory.current.set(path, { ...existing, preview: preview.scrollTop });
     };
 
@@ -42,7 +46,11 @@ export function useScrollMemory(
     return () => preview.removeEventListener("scroll", onPreviewScroll);
   }, [activePath]);
 
-  // Restore scroll after content settles — double rAF lets CM6 finish its DOM update
+  // Restore scroll after content settles.
+  // Double rAF: first rAF lets CM6's own rAF (scheduled by the dispatch in
+  // Editor's effect) complete its DOM update; second rAF then sets scrollTop
+  // after CM6 is done. CM6 does not auto-scroll to cursor for programmatic
+  // dispatches that omit scrollIntoView:true, so the value sticks.
   useEffect(() => {
     const saved = activePath ? memory.current.get(activePath) : null;
     if (!saved) return;
@@ -52,13 +60,8 @@ export function useScrollMemory(
     id1 = requestAnimationFrame(() => {
       id2 = requestAnimationFrame(() => {
         const view = viewRef.current;
-        if (view && saved.editorPos > 0) {
-          const pos = Math.min(saved.editorPos, view.state.doc.length);
-          view.dispatch({
-            effects: EditorView.scrollIntoView(pos, { y: "start", yMargin: 0 }),
-          });
-        }
         const preview = document.querySelector<HTMLElement>(".mdv-preview");
+        if (view) view.scrollDOM.scrollTop = saved.editor;
         if (preview) preview.scrollTop = saved.preview;
       });
     });
