@@ -352,7 +352,7 @@ export function App() {
   const [findFocusRequest, setFindFocusRequest] = useState(0);
   const [proseEl, setProseEl] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    if (!readingMode) {
+    if (editorOnly) {
       setProseEl(null);
       setFindOpen(false);
       return;
@@ -362,7 +362,7 @@ export function App() {
       setProseEl(document.querySelector<HTMLElement>(".mdv-prose"));
     });
     return () => window.cancelAnimationFrame(id);
-  }, [readingMode]);
+  }, [editorOnly, readingMode]);
 
   const copyMarkdown = useCallback(() => copyMarkdownCore(source), [copyMarkdownCore, source]);
 
@@ -627,6 +627,19 @@ export function App() {
 
   const shortcuts = useMemo(
     () => ({
+      // ⌘F / Ctrl+F — must be listed FIRST so it wins over mod+ctrl+f on
+      // Windows (where mod=Ctrl, making both combos identical). If CM has
+      // focus we return early so CodeMirror's own search opens instead.
+      ...(!editorOnly
+        ? {
+            "mod+f": (e: KeyboardEvent) => {
+              if (document.activeElement?.closest(".cm-editor")) return;
+              e.preventDefault();
+              setFindOpen(true);
+              setFindFocusRequest((v) => v + 1);
+            },
+          }
+        : {}),
       "mod+k": (e: KeyboardEvent) => {
         e.preventDefault();
         setPaletteOpen((v) => !v);
@@ -694,17 +707,6 @@ export function App() {
           exitReadingMode();
         }
       },
-      // ⌘F / Ctrl+F — only active in reading mode. In editor mode, codemirror
-      // owns ⌘F via its searchKeymap (editor.tsx:105).
-      ...(readingMode
-        ? {
-            "mod+f": (e: KeyboardEvent) => {
-              e.preventDefault();
-              setFindOpen(true);
-              setFindFocusRequest((v) => v + 1);
-            },
-          }
-        : {}),
     }),
     [
       activePath,
@@ -719,6 +721,7 @@ export function App() {
       copyMarkdown,
       exportToPdf,
       toggleFullscreen,
+      editorOnly,
       readingMode,
       toggleReadingMode,
       exitReadingMode,
@@ -967,6 +970,15 @@ export function App() {
                 />
               )}
             </div>
+            {!editorOnly && (
+              <ReadingFind
+                open={findOpen}
+                focusRequest={findFocusRequest}
+                onClose={() => setFindOpen(false)}
+                scope={proseEl}
+                contentKey={debouncedPreview}
+              />
+            )}
           </>
         )}
       </main>
