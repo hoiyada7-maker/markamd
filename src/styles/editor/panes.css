@@ -291,6 +291,11 @@
 .mdv-preview {
   height: 100%;
   overflow: auto;
+  /* Disable CSS scroll anchoring: we manage scrollTop ourselves via useScrollMemory
+     and useSyncScroll. Without this, the browser auto-adjusts scrollTop when
+     article.innerHTML is replaced (on tab switch) or when resolveLocalImages
+     sets img.src, causing scroll position jumps (e.g. 400→1214, 700→1514). */
+  overflow-anchor: none;
   padding: 20px 28px 80px;
   user-select: text;
 }

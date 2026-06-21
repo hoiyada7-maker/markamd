@@ -7,6 +7,8 @@ type Options = {
   previewSelector?: string;
   /** when this changes, re-bind in case DOM was replaced */
   rebindKey?: unknown;
+  /** while true, all sync is suppressed (used by useScrollMemory during restore) */
+  suppressRef?: RefObject<boolean>;
 };
 
 type SlineBlock = {
@@ -34,6 +36,7 @@ export function useSyncScroll({
   editorSelector = ".mdv-editor .cm-scroller",
   previewSelector = ".mdv-preview",
   rebindKey,
+  suppressRef,
 }: Options = {}): void {
   useEffect(() => {
     let editor: HTMLElement | null = null;
@@ -212,6 +215,7 @@ export function useSyncScroll({
     ) => {
       let pending = false;
       return () => {
+        if (suppressRef?.current) return;
         if (echo[srcKey] > 0) {
           echo[srcKey] -= 1;
           return;
@@ -220,6 +224,7 @@ export function useSyncScroll({
         pending = true;
         requestAnimationFrame(() => {
           pending = false;
+          if (suppressRef?.current) return;
           syncFn();
         });
       };

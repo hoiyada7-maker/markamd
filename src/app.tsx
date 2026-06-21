@@ -464,10 +464,11 @@ export function App() {
   }, []);
 
   const editorViewRef = useRef<EditorView | null>(null);
+  const scrollRestoringRef = useRef(false);
 
   // line-anchor editor <-> preview scroll sync; rebinds when active file changes
-  useSyncScroll({ viewRef: editorViewRef, rebindKey: activePath ?? "untitled" });
-  useScrollMemory(activePath, editorViewRef);
+  useSyncScroll({ viewRef: editorViewRef, rebindKey: activePath ?? "untitled", suppressRef: scrollRestoringRef });
+  useScrollMemory(activePath, scrollRestoringRef);
   useSelectionSyncText(editorViewRef, activePath ?? "untitled");
 
   const { words, minutes, docTokens } = useMemo(() => {
