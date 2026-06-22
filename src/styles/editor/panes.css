@@ -291,6 +291,7 @@
 .mdv-preview {
   height: 100%;
   overflow: auto;
+  overflow-anchor: none;
   padding: 20px 28px 80px;
   user-select: text;
 }
