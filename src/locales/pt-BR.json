@@ -178,5 +178,8 @@
   "diagram.actualSize": "tamanho real",
   "tabs.openFiles": "arquivos abertos",
   "tabs.close": "fechar {name}",
-  "tabs.closeUnsaved": "Fechar \"{name}\" com alterações não salvas?"
+  "tabs.closeUnsaved": "Fechar \"{name}\" com alterações não salvas?",
+  "tabs.closeThis": "Fechar",
+  "tabs.closeOthers": "Fechar outras abas",
+  "tabs.closeToRight": "Fechar abas à direita"
 }

@@ -178,5 +178,8 @@
   "diagram.actualSize": "taille réelle",
   "tabs.openFiles": "fichiers ouverts",
   "tabs.close": "fermer {name}",
-  "tabs.closeUnsaved": "Fermer \"{name}\" avec des modifications non enregistrées ?"
+  "tabs.closeUnsaved": "Fermer \"{name}\" avec des modifications non enregistrées ?",
+  "tabs.closeThis": "Fermer",
+  "tabs.closeOthers": "Fermer les autres onglets",
+  "tabs.closeToRight": "Fermer les onglets à droite"
 }

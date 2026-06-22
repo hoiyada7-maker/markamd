@@ -42,6 +42,8 @@ type UseFileSessionResult = {
   activeTabId: string;
   switchTab: (id: string) => void;
   closeTab: (id: string) => void;
+  closeOtherTabs: (id: string) => void;
+  closeTabsToRight: (id: string) => void;
   reorderTabs: (from: number, to: number) => void;
   rootPath: string | null;
   setRootPath: (v: string | null | ((p: string | null) => string | null)) => void;
@@ -180,6 +182,37 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
       return next;
     });
   }, []);
+
+  const closeOtherTabs = useCallback((id: string) => {
+    const current = snapshotActiveTab(tabs);
+    const keep = current.find((tab) => tab.id === id);
+    if (!keep) return;
+    setTabs([keep]);
+    if (activeTabId !== id) {
+      setActiveTabId(keep.id);
+      setSource(keep.source);
+      setSavedContent(keep.savedContent);
+      setActivePath(keep.path);
+      setSaveStatus(keep.source === keep.savedContent ? "idle" : "dirty");
+    }
+  }, [activeTabId, setActivePath, snapshotActiveTab, tabs]);
+
+  const closeTabsToRight = useCallback((id: string) => {
+    const current = snapshotActiveTab(tabs);
+    const index = current.findIndex((tab) => tab.id === id);
+    if (index === -1) return;
+    const remaining = current.slice(0, index + 1);
+    if (remaining.length === current.length) return;
+    setTabs(remaining);
+    if (!remaining.find((tab) => tab.id === activeTabId)) {
+      const next = remaining[remaining.length - 1];
+      setActiveTabId(next.id);
+      setSource(next.source);
+      setSavedContent(next.savedContent);
+      setActivePath(next.path);
+      setSaveStatus(next.source === next.savedContent ? "idle" : "dirty");
+    }
+  }, [activeTabId, setActivePath, snapshotActiveTab, tabs]);
 
   const closeTab = useCallback((id: string) => {
     const current = snapshotActiveTab(tabs);
@@ -440,6 +473,8 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     activeTabId,
     switchTab,
     closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
     reorderTabs,
     rootPath,
     setRootPath,

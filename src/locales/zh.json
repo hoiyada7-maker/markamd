@@ -178,5 +178,8 @@
   "diagram.actualSize": "实际大小",
   "tabs.openFiles": "打开的文件",
   "tabs.close": "关闭 {name}",
-  "tabs.closeUnsaved": "关闭带有未保存更改的“{name}”吗？"
+  "tabs.closeUnsaved": "关闭带有未保存更改的“{name}”吗？",
+  "tabs.closeThis": "关闭",
+  "tabs.closeOthers": "关闭其他标签页",
+  "tabs.closeToRight": "关闭右侧标签页"
 }
