@@ -34,6 +34,8 @@ type EditorProps = {
   onVimMode?: (mode: "normal" | "insert" | "visual" | "replace" | null) => void;
   /** shared ref populated with the EditorView once it mounts */
   viewRef?: RefObject<EditorView | null>;
+  /** fired with the 1-based line number whenever the cursor moves */
+  onCursorLine?: (line: number) => void;
 };
 
 // Folds the content under an ATX heading (# ## ###) down to the line
@@ -131,11 +133,13 @@ function buildTheme() {
   );
 }
 
-export function Editor({ value, onChange, vimOn = false, onVimMode, viewRef: externalViewRef }: EditorProps) {
+export function Editor({ value, onChange, vimOn = false, onVimMode, viewRef: externalViewRef, onCursorLine }: EditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onCursorLineRef = useRef(onCursorLine);
+  onCursorLineRef.current = onCursorLine;
   // Compartment lets us swap the vim extension at runtime without rebuilding
   // the EditorState (preserves doc, history, selection, undo stack).
   const vimCompartment = useRef(new Compartment());
@@ -164,6 +168,10 @@ export function Editor({ value, onChange, vimOn = false, onVimMode, viewRef: ext
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChangeRef.current(update.state.doc.toString());
+          }
+          if (update.selectionSet || update.docChanged) {
+            const line = update.state.doc.lineAt(update.state.selection.main.head).number;
+            onCursorLineRef.current?.(line);
           }
         }),
       ],

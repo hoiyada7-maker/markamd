@@ -1,0 +1,208 @@
+/* ── EditorPane layout ── */
+
+.mdv-editor-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mdv-editor-pane .mdv-editor {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+/* ── Heading breadcrumb bar ── */
+
+.mdv-hbar {
+  position: relative;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  z-index: 10;
+}
+
+.mdv-hbar__trigger {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 2px;
+  width: 100%;
+  padding: 0 12px;
+  height: 26px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  color: #d97706;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--easing);
+}
+
+.mdv-hbar__trigger:hover {
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.mdv-hbar__trigger.is-open {
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.mdv-hbar__crumb-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.mdv-hbar__crumb {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.mdv-hbar__chevron {
+  display: inline-flex;
+  align-items: center;
+  color: color-mix(in srgb, #d97706 55%, transparent);
+  flex-shrink: 0;
+}
+
+.mdv-hbar__empty {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ── TOC dropdown panel ── */
+
+.mdv-hbar__toc {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--fg) 20%, transparent);
+  z-index: 100;
+  animation: mdv-hbar-slide 110ms var(--easing);
+}
+
+@keyframes mdv-hbar-slide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mdv-hbar__toc-list,
+.mdv-hbar__toc-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mdv-hbar__toc-list {
+  padding: 4px 0;
+}
+
+.mdv-hbar__toc-node {
+  /* tree node container */
+}
+
+.mdv-hbar__toc-row {
+  display: flex;
+  align-items: center;
+  padding-right: 12px;
+  transition: background-color var(--dur-fast) var(--easing);
+}
+
+.mdv-hbar__toc-row:hover {
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+}
+
+.mdv-hbar__toc-row.is-ancestor {
+  color: color-mix(in srgb, #d97706 80%, var(--fg));
+}
+
+.mdv-hbar__toc-row.is-active {
+  background: color-mix(in srgb, #d97706 8%, transparent);
+}
+
+.mdv-hbar__toc-row.is-active:hover {
+  background: color-mix(in srgb, #d97706 13%, transparent);
+}
+
+/* fold toggle button */
+.mdv-hbar__toc-fold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 26px;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: color var(--dur-fast) var(--easing);
+}
+
+.mdv-hbar__toc-fold:hover {
+  color: var(--fg);
+}
+
+.mdv-hbar__toc-row.is-active .mdv-hbar__toc-fold,
+.mdv-hbar__toc-row.is-ancestor .mdv-hbar__toc-fold {
+  color: color-mix(in srgb, #d97706 60%, transparent);
+}
+
+.mdv-hbar__toc-leaf-dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--border);
+  margin: auto;
+}
+
+/* heading label button */
+.mdv-hbar__toc-label {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  padding: 5px 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mdv-hbar__toc-row.is-active .mdv-hbar__toc-label {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.mdv-hbar__toc-marker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+  letter-spacing: -0.05em;
+}
+
+.mdv-hbar__toc-row.is-active .mdv-hbar__toc-marker,
+.mdv-hbar__toc-row.is-ancestor .mdv-hbar__toc-marker {
+  color: color-mix(in srgb, #d97706 65%, transparent);
+}
+
+.mdv-hbar__toc-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
