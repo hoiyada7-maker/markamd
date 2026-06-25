@@ -2,7 +2,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine, drawSelection } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
-import { HighlightStyle, syntaxHighlighting, bracketMatching } from "@codemirror/language";
+import { HighlightStyle, syntaxHighlighting, bracketMatching, foldGutter, foldKeymap, foldService } from "@codemirror/language";
 import { search, searchKeymap } from "@codemirror/search";
 import { markdown } from "@codemirror/lang-markdown";
 import { tags as t } from "@lezer/highlight";
@@ -35,6 +35,26 @@ type EditorProps = {
   /** shared ref populated with the EditorView once it mounts */
   viewRef?: RefObject<EditorView | null>;
 };
+
+// Folds the content under an ATX heading (# ## ###) down to the line
+// before the next heading of equal or higher level.
+const markdownHeadingFold = foldService.of((state, from) => {
+  const line = state.doc.lineAt(from);
+  const m = line.text.match(/^(#{1,6})\s/);
+  if (!m) return null;
+  const level = m[1].length;
+  let end = line.to;
+  for (let i = line.number + 1; i <= state.doc.lines; i++) {
+    const next = state.doc.line(i);
+    const nm = next.text.match(/^(#{1,6})\s/);
+    if (nm && nm[1].length <= level) {
+      end = state.doc.line(i - 1).to;
+      break;
+    }
+    end = next.to;
+  }
+  return end > line.to ? { from: line.to, to: end } : null;
+});
 
 function buildTheme() {
   return EditorView.theme(
@@ -82,6 +102,30 @@ function buildTheme() {
       ".cm-line": {
         padding: "0",
       },
+      ".cm-foldGutter": {
+        width: "12px",
+        paddingRight: "2px",
+      },
+      ".cm-foldGutter .cm-gutterElement": {
+        cursor: "pointer",
+        color: "var(--muted)",
+        fontSize: "11px",
+        opacity: "0.5",
+        transition: "opacity 0.1s, color 0.1s",
+      },
+      ".cm-foldGutter .cm-gutterElement:hover": {
+        color: "var(--fg)",
+        opacity: "1",
+      },
+      ".cm-foldPlaceholder": {
+        backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+        borderRadius: "3px",
+        color: "var(--accent)",
+        padding: "0 4px",
+        margin: "0 2px",
+        cursor: "pointer",
+      },
     },
     { dark: false },
   );
@@ -103,6 +147,8 @@ export function Editor({ value, onChange, vimOn = false, onVimMode, viewRef: ext
       doc: value,
       extensions: [
         lineNumbers(),
+        foldGutter(),
+        markdownHeadingFold,
         history(),
         drawSelection(),
         highlightActiveLine(),
@@ -113,7 +159,7 @@ export function Editor({ value, onChange, vimOn = false, onVimMode, viewRef: ext
         search({ top: true }),
         // vim slot — empty until user toggles vimOn (#23)
         vimCompartment.current.of([]),
-        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap, indentWithTab]),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap, ...foldKeymap, indentWithTab]),
         buildTheme(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
