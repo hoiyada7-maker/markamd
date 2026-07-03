@@ -181,5 +181,6 @@
   "tabs.closeThis": "Cerrar",
   "tabs.closeOthers": "Cerrar otras pestañas",
   "tabs.closeToRight": "Cerrar pestañas a la derecha",
+  "tabs.reload": "Recargar",
   "tabs.closeUnsaved": "¿Cerrar \"{name}\" con cambios sin guardar?"
 }

@@ -41,6 +41,8 @@ type UseFileSessionResult = {
   tabs: FileTab[];
   activeTabId: string;
   switchTab: (id: string) => void;
+  /** Re-read a tab's file from disk, applying changes when not dirty. */
+  reloadTab: (id: string) => Promise<void>;
   closeTab: (id: string) => void;
   closeOtherTabs: (id: string) => void;
   closeTabsToRight: (id: string) => void;
@@ -105,6 +107,8 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
   const sourceRef = useRef(source);
   const savedRef = useRef(savedContent);
   const activePathRef = useRef(activePath);
+  const tabsRef = useRef(tabs);
+  const activeTabIdRef = useRef(activeTabId);
 
   useEffect(() => {
     sourceRef.current = source;
@@ -115,6 +119,12 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
   useEffect(() => {
     activePathRef.current = activePath;
   }, [activePath]);
+  useEffect(() => {
+    tabsRef.current = tabs;
+  }, [tabs]);
+  useEffect(() => {
+    activeTabIdRef.current = activeTabId;
+  }, [activeTabId]);
 
   const makeTabId = useCallback(() => {
     const next = tabSeq.current;
@@ -165,16 +175,53 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     setSaveStatus("idle");
   }, [activeTabId]);
 
+  // Re-read a tab's file from disk and apply if it changed. The file watcher
+  // only tracks the active path, so background tabs (and the just-switched-to
+  // tab, whose watcher resets without firing) can hold stale content. Skips
+  // dirty tabs to avoid clobbering unsaved edits — for the active tab it hands
+  // the fresh content to the existing conflict resolver instead.
+  const reloadTab = useCallback(async (id: string) => {
+    const before = tabsRef.current.find((tab) => tab.id === id);
+    if (!before?.path) return;
+    const path = before.path;
+    try {
+      const fresh = await readMarkdown(path);
+      const cur = tabsRef.current.find((tab) => tab.id === id);
+      if (!cur || cur.path !== path) return;
+      if (fresh === cur.source) return;
+      const isActive = id === activeTabIdRef.current;
+      const tabDirty = cur.source !== cur.savedContent;
+      if (tabDirty) {
+        if (isActive) setExternalConflict(fresh);
+        return;
+      }
+      setTabs((prev) => prev.map((tab) => (
+        tab.id === id ? { ...tab, source: fresh, savedContent: fresh } : tab
+      )));
+      if (isActive) {
+        setSource(fresh);
+        setSavedContent(fresh);
+        setSaveStatus("idle");
+      }
+    } catch (err) {
+      console.error("marka.md: reloadTab failed", err);
+    }
+  }, []);
+
   const switchTab = useCallback((id: string) => {
     const next = snapshotActiveTab(tabs).find((tab) => tab.id === id);
     if (!next) return;
     setTabs((prev) => snapshotActiveTab(prev));
     setActiveTabId(next.id);
+    // keep the ref in sync now so the async reloadTab below sees the right
+    // active tab before its state-driven effect has committed.
+    activeTabIdRef.current = next.id;
     setSource(next.source);
     setSavedContent(next.savedContent);
     setActivePath(next.path);
     setSaveStatus(next.source === next.savedContent ? "idle" : "dirty");
-  }, [snapshotActiveTab, setActivePath, tabs]);
+    void reloadTab(next.id);
+  }, [snapshotActiveTab, setActivePath, tabs, reloadTab]);
 
   const reorderTabs = useCallback((from: number, to: number) => {
     setTabs((prev) => {
@@ -501,6 +548,7 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     tabs,
     activeTabId,
     switchTab,
+    reloadTab,
     closeTab,
     closeOtherTabs,
     closeTabsToRight,

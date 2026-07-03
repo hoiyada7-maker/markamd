@@ -194,5 +194,6 @@
   "tabs.closeThis": "닫기",
   "tabs.closeOthers": "다른 탭 닫기",
   "tabs.closeToRight": "오른쪽 탭 닫기",
+  "tabs.reload": "새로고침",
   "tabs.closeUnsaved": "저장하지 않은 변경이 있는 \"{name}\"을 닫을까요?"
 }

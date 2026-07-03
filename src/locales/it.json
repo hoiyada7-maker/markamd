@@ -181,5 +181,6 @@
   "tabs.closeThis": "Chiudi",
   "tabs.closeOthers": "Chiudi le altre schede",
   "tabs.closeToRight": "Chiudi le schede a destra",
+  "tabs.reload": "Ricarica",
   "tabs.closeUnsaved": "Chiudere \"{name}\" con modifiche non salvate?"
 }

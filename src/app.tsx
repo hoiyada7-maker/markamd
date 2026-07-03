@@ -110,6 +110,7 @@ export function App() {
     tabs,
     activeTabId,
     switchTab,
+    reloadTab,
     closeTab,
     closeOtherTabs,
     closeTabsToRight,
@@ -869,6 +870,10 @@ export function App() {
           })();
         },
       });
+      items.push({
+        label: t("tabs.reload"),
+        onSelect: () => { void reloadTab(tabContextMenu.tabId); close(); },
+      });
       items.push("divider");
     }
 
@@ -876,7 +881,7 @@ export function App() {
     items.push({ label: t("tabs.closeOthers"), onSelect: () => { closeOtherTabs(tabContextMenu.tabId); close(); } });
     items.push({ label: t("tabs.closeToRight"), onSelect: () => { closeTabsToRight(tabContextMenu.tabId); close(); } });
     return items;
-  }, [tabContextMenu, tabs, rootPath, activePath, t, bumpTree, handleCloseTab,
+  }, [tabContextMenu, tabs, rootPath, activePath, t, bumpTree, handleCloseTab, reloadTab,
       closeOtherTabs, closeTabsToRight, setEditingPath, showSaveAsToast, loadDemo, setLoadError]);
 
   return (

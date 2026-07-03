@@ -181,5 +181,6 @@
   "tabs.closeThis": "閉じる",
   "tabs.closeOthers": "他のタブを閉じる",
   "tabs.closeToRight": "右側のタブを閉じる",
+  "tabs.reload": "再読み込み",
   "tabs.closeUnsaved": "未保存の変更がある「{name}」を閉じますか？"
 }

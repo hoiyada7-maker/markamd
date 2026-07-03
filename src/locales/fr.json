@@ -181,5 +181,6 @@
   "tabs.closeThis": "Fermer",
   "tabs.closeOthers": "Fermer les autres onglets",
   "tabs.closeToRight": "Fermer les onglets à droite",
+  "tabs.reload": "Recharger",
   "tabs.closeUnsaved": "Fermer \"{name}\" avec des modifications non enregistrées ?"
 }

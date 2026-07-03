@@ -181,5 +181,6 @@
   "tabs.closeThis": "Schließen",
   "tabs.closeOthers": "Andere Tabs schließen",
   "tabs.closeToRight": "Tabs rechts schließen",
+  "tabs.reload": "Neu laden",
   "tabs.closeUnsaved": "\"{name}\" mit ungespeicherten Änderungen schließen?"
 }

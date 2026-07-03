@@ -219,5 +219,6 @@
   "tabs.closeThis": "Close",
   "tabs.closeOthers": "Close other tabs",
   "tabs.closeToRight": "Close tabs to the right",
+  "tabs.reload": "Reload",
   "tabs.closeUnsaved": "Close \"{name}\" with unsaved changes?"
 }

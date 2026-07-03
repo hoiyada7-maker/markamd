@@ -181,5 +181,6 @@
   "tabs.closeThis": "Fechar",
   "tabs.closeOthers": "Fechar outras abas",
   "tabs.closeToRight": "Fechar abas à direita",
+  "tabs.reload": "Recarregar",
   "tabs.closeUnsaved": "Fechar \"{name}\" com alterações não salvas?"
 }

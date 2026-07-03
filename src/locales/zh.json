@@ -181,5 +181,6 @@
   "tabs.closeThis": "关闭",
   "tabs.closeOthers": "关闭其他标签页",
   "tabs.closeToRight": "关闭右侧标签页",
+  "tabs.reload": "重新加载",
   "tabs.closeUnsaved": "关闭带有未保存更改的“{name}”吗？"
 }
