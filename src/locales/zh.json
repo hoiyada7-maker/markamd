@@ -71,6 +71,7 @@
   "menu.newFolder": "新建文件夹",
   "menu.revealFinder": "在 Finder 中显示",
   "menu.openDefault": "用默认应用打开",
+  "menu.reload": "重新加载",
   "menu.delete": "删除",
   "menu.deleteFolder": "删除文件夹",
   "menu.confirmDelete": "删除“{name}”？\n\n此操作无法撤销。",

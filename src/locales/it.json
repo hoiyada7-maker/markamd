@@ -71,6 +71,7 @@
   "menu.newFolder": "nuova cartella",
   "menu.revealFinder": "mostra nel Finder",
   "menu.openDefault": "apri nell'app predefinita",
+  "menu.reload": "ricarica",
   "menu.delete": "elimina",
   "menu.deleteFolder": "elimina cartella",
   "menu.confirmDelete": "eliminare \"{name}\"?\n\nQuesta azione non può essere annullata.",

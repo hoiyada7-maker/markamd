@@ -84,6 +84,7 @@
   "menu.revealFinder": "Finder에서 보기",
   "menu.revealExplorer": "파일 탐색기에서 보기",
   "menu.openDefault": "기본 앱에서 열기",
+  "menu.reload": "새로고침",
   "menu.delete": "삭제",
   "menu.deleteFolder": "폴더 삭제",
   "menu.confirmDelete": "\"{name}\"을 삭제할까요?\n\n이 작업은 되돌릴 수 없습니다.",

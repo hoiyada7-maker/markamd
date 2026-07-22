@@ -111,6 +111,7 @@ export function App() {
     activeTabId,
     switchTab,
     reloadTab,
+    reloadFile,
     closeTab,
     closeOtherTabs,
     closeTabsToRight,
@@ -375,12 +376,16 @@ export function App() {
       setFindOpen(false);
       return;
     }
-    // wait one frame for Preview to render its <article class="mdv-prose">
+    if (!findOpen) return;
+    // Resolve the live <article class="mdv-prose"> only when find actually
+    // opens. Preview renders an empty-state (no article) until there's content,
+    // so a one-shot query at mode-change time could latch null forever; querying
+    // at open time always grabs the current, connected article.
     const id = window.requestAnimationFrame(() => {
       setProseEl(document.querySelector<HTMLElement>(".mdv-prose"));
     });
     return () => window.cancelAnimationFrame(id);
-  }, [editorOnly, readingMode]);
+  }, [editorOnly, readingMode, findOpen]);
 
   const copyMarkdown = useCallback(() => copyMarkdownCore(source), [copyMarkdownCore, source]);
 
@@ -552,6 +557,12 @@ export function App() {
       });
     }
     items.push("divider");
+    if (!isDir) {
+      items.push({
+        label: t("menu.reload"),
+        onSelect: () => void reloadFile(path),
+      });
+    }
     items.push({
       label: isDir ? t("menu.deleteFolder") : t("menu.delete"),
       destructive: true,
@@ -581,7 +592,7 @@ export function App() {
       },
     });
     return items;
-  }, [contextMenu, activePath, setActivePath, bumpTree, t]);
+  }, [contextMenu, activePath, setActivePath, bumpTree, reloadFile, t]);
 
   // OS "Open With → marka.md" from Finder — Rust emits marka:open-file
   useEffect(() => {
@@ -853,6 +864,10 @@ export function App() {
       });
       items.push("divider");
       items.push({
+        label: t("tabs.reload"),
+        onSelect: () => { void reloadTab(tabContextMenu.tabId); close(); },
+      });
+      items.push({
         label: t("menu.delete"),
         destructive: true,
         onSelect: () => {
@@ -869,10 +884,6 @@ export function App() {
             }
           })();
         },
-      });
-      items.push({
-        label: t("tabs.reload"),
-        onSelect: () => { void reloadTab(tabContextMenu.tabId); close(); },
       });
       items.push("divider");
     }

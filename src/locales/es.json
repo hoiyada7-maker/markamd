@@ -71,6 +71,7 @@
   "menu.newFolder": "carpeta nueva",
   "menu.revealFinder": "mostrar en Finder",
   "menu.openDefault": "abrir en la app predeterminada",
+  "menu.reload": "recargar",
   "menu.delete": "eliminar",
   "menu.deleteFolder": "eliminar carpeta",
   "menu.confirmDelete": "¿Eliminar \"{name}\"?\n\nEsta acción no se puede deshacer.",

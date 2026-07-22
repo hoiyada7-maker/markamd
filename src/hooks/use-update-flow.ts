@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { applyUpdate, checkForUpdate } from "@/lib/updater";
 import type { LoadError } from "./use-file-session";
 
@@ -21,18 +21,8 @@ export function useUpdateFlow({ onError }: UseUpdateFlowArgs): UseUpdateFlowResu
   const [updateInstalling, setUpdateInstalling] = useState(false);
   const [updateUpToDate, setUpdateUpToDate] = useState(false);
 
-  // check for updates once on launch (~1.5s after mount so the editor settles
-  // first). Tauri verifies the signature internally — anything not signed by
-  // our private updater key is rejected before the toast even appears.
-  useEffect(() => {
-    const timer = window.setTimeout(async () => {
-      const result = await checkForUpdate();
-      if (result.status === "available") {
-        setUpdateAvail({ version: result.version });
-      }
-    }, 1500);
-    return () => window.clearTimeout(timer);
-  }, []);
+  // No auto-check on launch — update availability is surfaced only when the
+  // user explicitly runs handleManualUpdateCheck (e.g. from the command menu).
 
   const handleApplyUpdate = useCallback(async () => {
     if (updateInstalling) return;

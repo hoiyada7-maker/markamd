@@ -30,6 +30,9 @@ export function ReadingFind({ open, focusRequest = 0, onClose, scope, contentKey
   const [matches, setMatches] = useState<HTMLElement[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  // stays false until the user's first Enter/arrow on the current results —
+  // so merely typing highlights matches without scrolling the view.
+  const hasNavigatedRef = useRef(false);
 
   // re-highlight whenever query, scope, or content changes — debounced 80ms.
   // contentKey is in the deps so when Preview re-renders the prose article
@@ -51,9 +54,11 @@ export function ReadingFind({ open, focusRequest = 0, onClose, scope, contentKey
       const connected = hits.filter((h) => h.isConnected);
       setMatches(connected);
       setActiveIdx(0);
+      hasNavigatedRef.current = false;
+      // mark the first hit active for the count label, but don't scroll —
+      // the view only moves once the user presses Enter/arrow (see `go`).
       if (connected[0]) {
         connected[0].classList.add("mdv-find-hit--active");
-        connected[0].scrollIntoView({ block: "center", behavior: "smooth" });
       }
     }, 80);
     return () => window.clearTimeout(t);
@@ -78,6 +83,17 @@ export function ReadingFind({ open, focusRequest = 0, onClose, scope, contentKey
   const go = useCallback(
     (dir: 1 | -1) => {
       if (matches.length === 0) return;
+      // first navigation just reveals the already-active first hit instead of
+      // advancing, so Enter lands on match 1, not match 2.
+      if (!hasNavigatedRef.current) {
+        hasNavigatedRef.current = true;
+        const first = matches[activeIdx];
+        if (first) {
+          first.classList.add("mdv-find-hit--active");
+          first.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        return;
+      }
       matches[activeIdx]?.classList.remove("mdv-find-hit--active");
       const next = (activeIdx + dir + matches.length) % matches.length;
       setActiveIdx(next);

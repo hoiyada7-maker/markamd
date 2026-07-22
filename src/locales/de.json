@@ -71,6 +71,7 @@
   "menu.newFolder": "neuer Ordner",
   "menu.revealFinder": "im Finder anzeigen",
   "menu.openDefault": "in Standard-App öffnen",
+  "menu.reload": "neu laden",
   "menu.delete": "löschen",
   "menu.deleteFolder": "Ordner löschen",
   "menu.confirmDelete": "\"{name}\" löschen?\n\nDies kann nicht rückgängig gemacht werden.",

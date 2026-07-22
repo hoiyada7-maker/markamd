@@ -71,6 +71,7 @@
   "menu.newFolder": "新規フォルダ",
   "menu.revealFinder": "Finder で表示",
   "menu.openDefault": "既定のアプリで開く",
+  "menu.reload": "再読み込み",
   "menu.delete": "削除",
   "menu.deleteFolder": "フォルダを削除",
   "menu.confirmDelete": "「{name}」を削除しますか？\n\nこの操作は元に戻せません。",

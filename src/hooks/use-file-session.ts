@@ -43,6 +43,8 @@ type UseFileSessionResult = {
   switchTab: (id: string) => void;
   /** Re-read a tab's file from disk, applying changes when not dirty. */
   reloadTab: (id: string) => Promise<void>;
+  /** Re-read a file from disk by path (sidebar reload); opens it if not open. */
+  reloadFile: (path: string) => Promise<void>;
   closeTab: (id: string) => void;
   closeOtherTabs: (id: string) => void;
   closeTabsToRight: (id: string) => void;
@@ -349,6 +351,15 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     ],
   );
 
+  const reloadFile = useCallback(async (path: string) => {
+    const tab = tabsRef.current.find((t) => t.path === path);
+    if (!tab) {
+      await loadFile(path);
+      return;
+    }
+    await reloadTab(tab.id);
+  }, [loadFile, reloadTab]);
+
   const loadDemo = useCallback(() => {
     setSource(DEMO_MARKDOWN);
     setSavedContent(DEMO_MARKDOWN);
@@ -549,6 +560,7 @@ export function useFileSession({ onLoadError }: UseFileSessionArgs = {}): UseFil
     activeTabId,
     switchTab,
     reloadTab,
+    reloadFile,
     closeTab,
     closeOtherTabs,
     closeTabsToRight,

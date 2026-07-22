@@ -71,6 +71,7 @@
   "menu.newFolder": "nouveau dossier",
   "menu.revealFinder": "afficher dans le Finder",
   "menu.openDefault": "ouvrir dans l'app par défaut",
+  "menu.reload": "recharger",
   "menu.delete": "supprimer",
   "menu.deleteFolder": "supprimer le dossier",
   "menu.confirmDelete": "supprimer \"{name}\" ?\n\nCette action est irréversible.",

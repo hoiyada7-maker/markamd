@@ -71,6 +71,7 @@
   "menu.newFolder": "nova pasta",
   "menu.revealFinder": "mostrar no Finder",
   "menu.openDefault": "abrir no app padrão",
+  "menu.reload": "recarregar",
   "menu.delete": "excluir",
   "menu.deleteFolder": "excluir pasta",
   "menu.confirmDelete": "excluir \"{name}\"?\n\nIsso não pode ser desfeito.",
